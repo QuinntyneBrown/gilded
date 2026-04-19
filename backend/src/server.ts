@@ -206,8 +206,15 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     updateIntentStatusHandler(req, res, id, 'cancelled').catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
+  if (req.method === 'GET' && path === '/api/notes/public') {
+    getPublicFeedHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
   if (req.method === 'POST' && path === '/api/notes') {
-    if (url.searchParams.get('visibility') === 'spouse') {
+    const vis = url.searchParams.get('visibility');
+    if (vis === 'public') {
+      createPublicNoteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    } else if (vis === 'spouse') {
       createSpouseNoteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     } else {
       createPrivateNoteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
@@ -226,6 +233,7 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     const id = path.slice('/api/notes/'.length);
     (async () => {
       const note = await noteStore.findById(id);
+      if (note?.visibility === 'public') return updatePublicNoteHandler(req, res, id);
       if (note?.visibility === 'spouse') return updateSpouseNoteHandler(req, res, id);
       return updatePrivateNoteHandler(req, res, id);
     })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
@@ -235,6 +243,7 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     const id = path.slice('/api/notes/'.length);
     (async () => {
       const note = await noteStore.findById(id);
+      if (note?.visibility === 'public') return deletePublicNoteHandler(req, res, id);
       if (note?.visibility === 'spouse') return deleteSpouseNoteHandler(req, res, id);
       return deletePrivateNoteHandler(req, res, id);
     })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
