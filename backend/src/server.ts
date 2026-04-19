@@ -19,6 +19,8 @@ import { createChosenCounsellorHandler, createGetNotificationsHandler } from './
 import { InMemoryNotificationStore } from './auth/notification-store.ts';
 import { createCreateIntentHandler, createGetCurrentIntentHandler, createUpdateIntentStatusHandler } from './appointment/appointment.ts';
 import { InMemoryAppointmentStore } from './appointment/appointment-store.ts';
+import { createCreatePrivateNoteHandler, createListPrivateNotesHandler, createUpdatePrivateNoteHandler, createDeletePrivateNoteHandler } from './notes/private-notes.ts';
+import { InMemoryNoteStore } from './notes/note.ts';
 import { InMemoryRatingStore } from './counsellor/rating-store.ts';
 import { InMemoryReviewStore } from './counsellor/review-store.ts';
 import { InMemoryCommentStore } from './counsellor/comment-store.ts';
@@ -60,6 +62,7 @@ const commentStore = new InMemoryCommentStore();
 const shortlistStore = new InMemoryShortlistStore();
 const notificationStore = new InMemoryNotificationStore();
 const appointmentStore = new InMemoryAppointmentStore();
+const noteStore = new InMemoryNoteStore();
 const postalCache = new InMemoryPostalCodeCache();
 const geocodingService = new GeocodingService(postalCache, {
   geocode: async () => { throw new Error('GEOCODING_API_KEY not configured'); },
@@ -94,6 +97,10 @@ const deleteCommentHandler = createDeleteCommentHandler({ commentStore, reviewSt
 const uploadPhotoHandler = createUploadPhotoHandler({ counsellorStore });
 const servePhotoHandler = createServePhotoHandler({ counsellorStore });
 const searchCounsellorsHandler = createSearchCounsellorsHandler({ counsellorStore, geocodingService });
+const createPrivateNoteHandler = createCreatePrivateNoteHandler({ noteStore, sessionStore });
+const listPrivateNotesHandler = createListPrivateNotesHandler({ noteStore, sessionStore });
+const updatePrivateNoteHandler = createUpdatePrivateNoteHandler({ noteStore, sessionStore });
+const deletePrivateNoteHandler = createDeletePrivateNoteHandler({ noteStore, sessionStore });
 const createIntentHandler = createCreateIntentHandler({ appointmentStore, sessionStore, userStore });
 const getCurrentIntentHandler = createGetCurrentIntentHandler({ appointmentStore, sessionStore, userStore });
 const updateIntentStatusHandler = createUpdateIntentStatusHandler({ appointmentStore, sessionStore });
@@ -187,6 +194,24 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   if (req.method === 'POST' && path.startsWith('/api/appointment-intent/') && path.endsWith('/cancelled')) {
     const id = path.slice('/api/appointment-intent/'.length, -'/cancelled'.length);
     updateIntentStatusHandler(req, res, id, 'cancelled').catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path === '/api/notes') {
+    createPrivateNoteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'GET' && path === '/api/notes') {
+    listPrivateNotesHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'PUT' && path.startsWith('/api/notes/')) {
+    const id = path.slice('/api/notes/'.length);
+    updatePrivateNoteHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'DELETE' && path.startsWith('/api/notes/')) {
+    const id = path.slice('/api/notes/'.length);
+    deletePrivateNoteHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/shortlist/')) {

@@ -21,6 +21,7 @@ export interface NoteStore {
   findByCouple(coupleId: string): Promise<Note[]>;
   update(id: string, patch: Partial<Pick<Note, 'ciphertext' | 'iv' | 'body' | 'updatedAt'>>): Promise<void>;
   softDelete(id: string): Promise<void>;
+  hardDelete(id: string): Promise<void>;
 }
 
 export class InMemoryNoteStore implements NoteStore {
@@ -54,5 +55,9 @@ export class InMemoryNoteStore implements NoteStore {
   async softDelete(id: string): Promise<void> {
     const note = this.byId.get(id);
     if (note) note.deletedAt = new Date();
+  }
+
+  async hardDelete(id: string): Promise<void> {
+    this.byId.delete(id);
   }
 }
