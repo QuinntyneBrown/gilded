@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import bcrypt from 'bcryptjs';
 import type { UserStore, User } from './user-store.ts';
 import type { Mailer } from './mailer.ts';
+import type { CaptchaVerifier } from './captcha.ts';
 
 const PASSWORD_RE = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z\d]).{12,}$/;
 
@@ -13,6 +14,7 @@ export function validatePassword(password: string): boolean {
 export interface SignupDeps {
   userStore: UserStore;
   mailer: Mailer;
+  captchaVerifier?: CaptchaVerifier;
 }
 
 export async function signupUser(
@@ -62,7 +64,22 @@ export function createSignupHandler(deps: SignupDeps) {
       return;
     }
 
-    const { email, password } = (body ?? {}) as Record<string, unknown>;
+    const { email, password, captchaToken } = (body ?? {}) as Record<string, unknown>;
+
+    if (deps.captchaVerifier) {
+      if (typeof captchaToken !== 'string' || !captchaToken) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'captchaToken required' }));
+        return;
+      }
+      const { success } = await deps.captchaVerifier.verify(captchaToken);
+      if (!success) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'CAPTCHA verification failed' }));
+        return;
+      }
+    }
+
     if (typeof email !== 'string' || !email || typeof password !== 'string' || !password) {
       res.writeHead(400, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'email and password required' }));

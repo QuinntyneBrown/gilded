@@ -12,7 +12,7 @@ export default defineConfig({
       url: 'http://127.0.0.1:3000/health',
       reuseExistingServer: !process.env['CI'],
       timeout: 120_000,
-      env: { CAPTURE_EMAILS: '1' },
+      env: { CAPTURE_EMAILS: '1', CAPTCHA_DISABLED: '1' },
     },
     {
       command: `npm run dev:frontend -- --port ${port}`,

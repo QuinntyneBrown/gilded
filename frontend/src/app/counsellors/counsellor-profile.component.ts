@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
@@ -86,10 +86,14 @@ export class ConfirmDialogComponent {}
   templateUrl: './counsellor-profile.component.html',
   styleUrl: './counsellor-profile.component.scss',
 })
-export class CounsellorProfilePageComponent implements OnInit {
+const TURNSTILE_SITE_KEY = '1x00000000000000000000AA';
+
+export class CounsellorProfilePageComponent implements OnInit, AfterViewInit {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
+
+  private reviewCaptchaToken: string | null = null;
 
   readonly counsellor = signal<CounsellorProfile | null>(null);
   readonly loading = signal(true);
@@ -111,6 +115,17 @@ export class CounsellorProfilePageComponent implements OnInit {
   });
 
   readonly reviewCharCount = computed(() => this.reviewBody().length);
+
+  ngAfterViewInit(): void {
+    const turnstile = (window as Record<string, unknown>)['turnstile'] as { render(id: string, opts: unknown): void } | undefined;
+    if (turnstile) {
+      turnstile.render('#review-captcha', {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token: string) => { this.reviewCaptchaToken = token; },
+        'expired-callback': () => { this.reviewCaptchaToken = null; },
+      });
+    }
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
@@ -148,7 +163,9 @@ export class CounsellorProfilePageComponent implements OnInit {
     const id = this.counsellor()?.id;
     const body = this.reviewBody().trim();
     if (!id || !body) return;
-    this.http.post<Review>(`/api/counsellors/${id}/reviews`, { body }).subscribe({
+    const reviewPayload: Record<string, unknown> = { body };
+    if (this.reviewCaptchaToken) reviewPayload['captchaToken'] = this.reviewCaptchaToken;
+    this.http.post<Review>(`/api/counsellors/${id}/reviews`, reviewPayload).subscribe({
       next: (review) => {
         this.reviews.update(r => [review, ...r]);
         this.reviewBody.set('');

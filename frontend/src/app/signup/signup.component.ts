@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, AfterViewInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,7 +22,9 @@ import { passwordPolicy } from '../auth/validators';
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.scss',
 })
-export class SignupPageComponent {
+const TURNSTILE_SITE_KEY = '1x00000000000000000000AA';
+
+export class SignupPageComponent implements AfterViewInit {
   private readonly http = inject(HttpClient);
 
   readonly form = new FormGroup({
@@ -34,13 +36,28 @@ export class SignupPageComponent {
   readonly confirmed = signal(false);
   readonly serverError = signal('');
 
+  private captchaToken: string | null = null;
+
+  ngAfterViewInit(): void {
+    const turnstile = (window as Record<string, unknown>)['turnstile'] as { render(id: string, opts: unknown): void } | undefined;
+    if (turnstile) {
+      turnstile.render('#signup-captcha', {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token: string) => { this.captchaToken = token; },
+        'expired-callback': () => { this.captchaToken = null; },
+      });
+    }
+  }
+
   submit(): void {
     this.form.markAllAsTouched();
     if (this.form.invalid || this.submitting()) return;
     this.submitting.set(true);
     this.serverError.set('');
     const { email, password } = this.form.getRawValue();
-    this.http.post('/api/auth/signup', { email, password }).subscribe({
+    const body: Record<string, unknown> = { email, password };
+    if (this.captchaToken) body['captchaToken'] = this.captchaToken;
+    this.http.post('/api/auth/signup', body).subscribe({
       next: () => {
         this.confirmed.set(true);
         this.submitting.set(false);

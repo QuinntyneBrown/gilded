@@ -6,6 +6,7 @@ import type { SessionStore } from '../auth/session-store.ts';
 import type { UserStore } from '../auth/user-store.ts';
 import { evaluate } from '../moderation/ruleset.ts';
 import type { SlidingWindowLimiter } from '../auth/global-rate-limiter.ts';
+import type { CaptchaVerifier } from '../auth/captcha.ts';
 
 interface ReviewDeps {
   counsellorStore: CounsellorStore;
@@ -13,6 +14,7 @@ interface ReviewDeps {
   sessionStore: SessionStore;
   userStore: UserStore;
   limiter?: SlidingWindowLimiter;
+  captchaVerifier?: CaptchaVerifier;
 }
 
 function parseCookies(header: string): Record<string, string> {
@@ -33,7 +35,7 @@ function renderReview(r: Review) {
   return { id: r.id, counsellorId: r.counsellorId, authorId: r.authorId, body: r.body, createdAt: r.createdAt.toISOString() };
 }
 
-export function createPostReviewHandler({ counsellorStore, reviewStore, sessionStore, limiter }: ReviewDeps) {
+export function createPostReviewHandler({ counsellorStore, reviewStore, sessionStore, limiter, captchaVerifier }: ReviewDeps) {
   return async (req: IncomingMessage, res: ServerResponse, counsellorId: string): Promise<void> => {
     const session = await requireSession(req, sessionStore);
     if (!session) {
@@ -58,7 +60,22 @@ export function createPostReviewHandler({ counsellorStore, reviewStore, sessionS
       req.on('end', () => resolve());
       req.on('error', reject);
     });
-    const { body } = JSON.parse(data) as { body?: string };
+    const { body, captchaToken } = JSON.parse(data) as { body?: string; captchaToken?: string };
+
+    if (captchaVerifier) {
+      if (typeof captchaToken !== 'string' || !captchaToken) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'captchaToken required' }));
+        return;
+      }
+      const { success } = await captchaVerifier.verify(captchaToken);
+      if (!success) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'CAPTCHA verification failed' }));
+        return;
+      }
+    }
+
     const text = String(body ?? '').trim();
 
     if (text.length < 20 || text.length > 4000) {

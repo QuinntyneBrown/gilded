@@ -36,6 +36,8 @@ import { InMemoryCoupleStore } from './couple/couple-store.ts';
 import { InMemoryCounsellorStore } from './counsellor/counsellor-store.ts';
 import { EventBus } from './events.ts';
 import { SlidingWindowLimiter, ipKey } from './auth/global-rate-limiter.ts';
+import { TurnstileCaptchaVerifier } from './auth/captcha.ts';
+import type { CaptchaVerifier } from './auth/captcha.ts';
 import { NodemailerMailer } from './auth/mailer.ts';
 import type { Mailer } from './auth/mailer.ts';
 
@@ -73,11 +75,15 @@ const eventBus = new EventBus();
 const authDeps = { userStore, mailer: buildMailer() };
 const sessionDeps = { userStore, sessionStore };
 
-const signupHandler = createSignupHandler(authDeps);
+const globalRateLimiter = new SlidingWindowLimiter(10, 60_000);
+const captchaVerifier: CaptchaVerifier | undefined =
+  process.env['CAPTCHA_DISABLED'] === '1' ? undefined :
+  process.env['TURNSTILE_SECRET_KEY'] ? new TurnstileCaptchaVerifier(process.env['TURNSTILE_SECRET_KEY']) :
+  undefined;
+const userCreationLimiter = new SlidingWindowLimiter(20, 3_600_000);
+const signupHandler = createSignupHandler({ ...authDeps, captchaVerifier });
 const verifyHandler = createVerifyHandler(authDeps);
 const resendHandler = createResendHandler(authDeps);
-const globalRateLimiter = new SlidingWindowLimiter(10, 60_000);
-const userCreationLimiter = new SlidingWindowLimiter(20, 3_600_000);
 const loginHandler = createLoginHandler(sessionDeps);
 const meHandler = createMeHandler(sessionDeps);
 const logoutHandler = createLogoutHandler({ sessionStore });
@@ -92,7 +98,7 @@ const listPendingHandler = createListPendingHandler({ counsellorStore, sessionSt
 const approveHandler = createApproveHandler({ counsellorStore, sessionStore, userStore, mailer: authDeps.mailer });
 const rejectHandler = createRejectHandler({ counsellorStore, sessionStore, userStore, mailer: authDeps.mailer });
 const rateCounsellorHandler = createRateCounsellorHandler({ counsellorStore, ratingStore, sessionStore });
-const postReviewHandler = createPostReviewHandler({ counsellorStore, reviewStore, sessionStore, userStore, limiter: userCreationLimiter });
+const postReviewHandler = createPostReviewHandler({ counsellorStore, reviewStore, sessionStore, userStore, limiter: userCreationLimiter, captchaVerifier });
 const getReviewsHandler = createGetReviewsHandler({ counsellorStore, reviewStore, sessionStore, userStore });
 const deleteReviewHandler = createDeleteReviewHandler({ counsellorStore, reviewStore, sessionStore, userStore });
 const postCommentHandler = createPostCommentHandler({ commentStore, reviewStore, sessionStore, userStore, limiter: userCreationLimiter });
