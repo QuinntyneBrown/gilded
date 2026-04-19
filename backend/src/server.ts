@@ -40,6 +40,7 @@ import { TurnstileCaptchaVerifier } from './auth/captcha.ts';
 import type { CaptchaVerifier } from './auth/captcha.ts';
 import { NodemailerMailer } from './auth/mailer.ts';
 import type { Mailer } from './auth/mailer.ts';
+import { createRequestMiddleware, ConsoleLogger } from './logger.ts';
 
 const CAPTURE = process.env['CAPTURE_EMAILS'] === '1';
 const captureLog: { email: string; token: string }[] = [];
@@ -136,6 +137,8 @@ eventBus.on('CoupleCreated', (event) => {
   ]).catch(console.error);
 });
 
+const requestLogger = createRequestMiddleware({ logger: new ConsoleLogger() });
+
 function rejectRateLimit(req: IncomingMessage, res: ServerResponse): boolean {
   const { limited, retryAfterSecs } = globalRateLimiter.checkAndRecord(ipKey(req));
   if (limited) {
@@ -147,6 +150,13 @@ function rejectRateLimit(req: IncomingMessage, res: ServerResponse): boolean {
 }
 
 export function handler(req: IncomingMessage, res: ServerResponse): void {
+  requestLogger(req, res, routeRequest).catch(err => {
+    console.error(err);
+    if (!res.headersSent) { res.writeHead(500); res.end(); }
+  });
+}
+
+async function routeRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const url = new URL(req.url ?? '', 'http://x');
   const path = url.pathname;
 
@@ -157,214 +167,214 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   }
   if (req.method === 'POST' && path === '/api/auth/signup') {
     if (rejectRateLimit(req, res)) return;
-    signupHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await signupHandler(req, res);
     return;
   }
   if (req.method === 'GET' && path === '/api/auth/verify') {
-    verifyHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await verifyHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/auth/resend-verification') {
-    resendHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await resendHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/auth/login') {
     if (rejectRateLimit(req, res)) return;
-    loginHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await loginHandler(req, res);
     return;
   }
   if (req.method === 'GET' && path === '/api/auth/me') {
-    meHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await meHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/auth/logout') {
-    logoutHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await logoutHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/auth/reset-request') {
     if (rejectRateLimit(req, res)) return;
-    resetRequestHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await resetRequestHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/auth/reset-complete') {
-    resetCompleteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await resetCompleteHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/couple/invite') {
     if (rejectRateLimit(req, res)) return;
-    inviteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await inviteHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/couple/accept') {
-    acceptHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await acceptHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/couple/unlink') {
-    unlinkHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await unlinkHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/couple/chosen') {
-    chosenCounsellorHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await chosenCounsellorHandler(req, res);
     return;
   }
   if (req.method === 'GET' && path === '/api/me/notifications') {
-    getNotificationsHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await getNotificationsHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/appointment-intent') {
-    createIntentHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await createIntentHandler(req, res);
     return;
   }
   if (req.method === 'GET' && path === '/api/me/appointment-intent/current') {
-    getCurrentIntentHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await getCurrentIntentHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/appointment-intent/') && path.endsWith('/booked')) {
     const id = path.slice('/api/appointment-intent/'.length, -'/booked'.length);
-    updateIntentStatusHandler(req, res, id, 'booked').catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await updateIntentStatusHandler(req, res, id, 'booked');
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/appointment-intent/') && path.endsWith('/cancelled')) {
     const id = path.slice('/api/appointment-intent/'.length, -'/cancelled'.length);
-    updateIntentStatusHandler(req, res, id, 'cancelled').catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await updateIntentStatusHandler(req, res, id, 'cancelled');
     return;
   }
   if (req.method === 'GET' && path === '/api/notes/public') {
-    getPublicFeedHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await getPublicFeedHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/notes') {
     const vis = url.searchParams.get('visibility');
     if (vis === 'public') {
-      createPublicNoteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+      await createPublicNoteHandler(req, res);
     } else if (vis === 'spouse') {
-      createSpouseNoteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+      await createSpouseNoteHandler(req, res);
     } else {
-      createPrivateNoteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+      await createPrivateNoteHandler(req, res);
     }
     return;
   }
   if (req.method === 'GET' && path === '/api/notes') {
     if (url.searchParams.get('visibility') === 'spouse') {
-      listSpouseNotesHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+      await listSpouseNotesHandler(req, res);
     } else {
-      listPrivateNotesHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+      await listPrivateNotesHandler(req, res);
     }
     return;
   }
   if (req.method === 'GET' && path.startsWith('/api/notes/')) {
     const id = path.slice('/api/notes/'.length);
-    getNoteByIdHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await getNoteByIdHandler(req, res, id);
     return;
   }
   if (req.method === 'PUT' && path.startsWith('/api/notes/')) {
     const id = path.slice('/api/notes/'.length);
-    (async () => {
+    await (async () => {
       const note = await noteStore.findById(id);
       if (note?.visibility === 'public') return updatePublicNoteHandler(req, res, id);
       if (note?.visibility === 'spouse') return updateSpouseNoteHandler(req, res, id);
       return updatePrivateNoteHandler(req, res, id);
-    })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    })();
     return;
   }
   if (req.method === 'DELETE' && path.startsWith('/api/notes/')) {
     const id = path.slice('/api/notes/'.length);
-    (async () => {
+    await (async () => {
       const note = await noteStore.findById(id);
       if (note?.visibility === 'public') return deletePublicNoteHandler(req, res, id);
       if (note?.visibility === 'spouse') return deleteSpouseNoteHandler(req, res, id);
       return deletePrivateNoteHandler(req, res, id);
-    })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    })();
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/shortlist/')) {
     const id = path.slice('/api/shortlist/'.length);
-    addToShortlistHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await addToShortlistHandler(req, res, id);
     return;
   }
   if (req.method === 'DELETE' && path.startsWith('/api/shortlist/')) {
     const id = path.slice('/api/shortlist/'.length);
-    removeFromShortlistHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await removeFromShortlistHandler(req, res, id);
     return;
   }
   if (req.method === 'GET' && path === '/api/shortlist') {
-    getShortlistHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await getShortlistHandler(req, res);
     return;
   }
   if (req.method === 'GET' && path === '/api/admin/counsellors/pending') {
-    listPendingHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await listPendingHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/admin/counsellors/') && path.endsWith('/approve')) {
     const id = path.slice('/api/admin/counsellors/'.length, -'/approve'.length);
-    approveHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await approveHandler(req, res, id);
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/admin/counsellors/') && path.endsWith('/reject')) {
     const id = path.slice('/api/admin/counsellors/'.length, -'/reject'.length);
-    rejectHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await rejectHandler(req, res, id);
     return;
   }
   if (req.method === 'PUT' && path.startsWith('/api/counsellors/') && path.endsWith('/rating')) {
     const id = path.slice('/api/counsellors/'.length, -'/rating'.length);
-    rateCounsellorHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await rateCounsellorHandler(req, res, id);
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/counsellors/') && path.endsWith('/photo')) {
     const id = path.slice('/api/counsellors/'.length, -'/photo'.length);
-    uploadPhotoHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await uploadPhotoHandler(req, res, id);
     return;
   }
   if (req.method === 'GET' && path.startsWith('/api/counsellors/') && path.endsWith('/photo')) {
     const id = path.slice('/api/counsellors/'.length, -'/photo'.length);
-    servePhotoHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await servePhotoHandler(req, res, id);
     return;
   }
   if (req.method === 'POST' && path === '/api/counsellors') {
-    submitCounsellorHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await submitCounsellorHandler(req, res);
     return;
   }
   if (req.method === 'GET' && path === '/api/counsellors') {
-    searchCounsellorsHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await searchCounsellorsHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/counsellors/') && path.endsWith('/reviews')) {
     const id = path.slice('/api/counsellors/'.length, -'/reviews'.length);
-    postReviewHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await postReviewHandler(req, res, id);
     return;
   }
   if (req.method === 'GET' && path.startsWith('/api/counsellors/') && path.endsWith('/reviews')) {
     const id = path.slice('/api/counsellors/'.length, -'/reviews'.length);
-    getReviewsHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await getReviewsHandler(req, res, id);
     return;
   }
   if (req.method === 'DELETE' && path.startsWith('/api/reviews/') && !path.includes('/comments')) {
     const id = path.slice('/api/reviews/'.length);
-    deleteReviewHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await deleteReviewHandler(req, res, id);
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/reviews/') && path.endsWith('/comments')) {
     const id = path.slice('/api/reviews/'.length, -'/comments'.length);
-    postCommentHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await postCommentHandler(req, res, id);
     return;
   }
   if (req.method === 'GET' && path.startsWith('/api/reviews/') && path.endsWith('/comments')) {
     const id = path.slice('/api/reviews/'.length, -'/comments'.length);
-    getCommentsHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await getCommentsHandler(req, res, id);
     return;
   }
   if (req.method === 'DELETE' && path.startsWith('/api/comments/')) {
     const id = path.slice('/api/comments/'.length);
-    deleteCommentHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await deleteCommentHandler(req, res, id);
     return;
   }
   if (req.method === 'GET' && path.startsWith('/api/counsellors/')) {
     const id = path.slice('/api/counsellors/'.length);
-    getCounsellorHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    await getCounsellorHandler(req, res, id);
     return;
   }
   if (CAPTURE && req.method === 'POST' && path === '/api/dev/seed/postal') {
-    (async () => {
+    await (async () => {
       let data = '';
       await new Promise<void>((resolve, reject) => {
         req.on('data', (c) => (data += c));
@@ -375,11 +385,11 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
       await postalCache.save(body.code.toUpperCase().replace(/\s/g, ''), body.lat, body.lng);
       res.writeHead(201, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: true }));
-    })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    })();
     return;
   }
   if (CAPTURE && req.method === 'POST' && path === '/api/dev/seed/counsellor') {
-    (async () => {
+    await (async () => {
       let data = '';
       await new Promise<void>((resolve, reject) => {
         req.on('data', (c) => (data += c));
@@ -421,16 +431,15 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
       await counsellorStore.create(counsellor);
       res.writeHead(201, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ id: counsellor.id }));
-    })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    })();
     return;
   }
   if (CAPTURE && req.method === 'GET' && path === '/api/dev/user') {
     const email = url.searchParams.get('email') ?? '';
-    userStore.findByEmail(email).then(user => {
-      if (!user) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'not found' })); return; }
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ userId: user.id, email: user.email, state: user.state, spouseId: user.spouseId, coupleId: user.coupleId }));
-    }).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    const user = await userStore.findByEmail(email);
+    if (!user) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'not found' })); return; }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ userId: user.id, email: user.email, state: user.state, spouseId: user.spouseId, coupleId: user.coupleId }));
     return;
   }
   if (CAPTURE && req.method === 'GET' && path === '/api/dev/last-token') {
@@ -447,14 +456,13 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   }
   if (CAPTURE && req.method === 'GET' && path === '/api/dev/session') {
     const sid = url.searchParams.get('sid') ?? '';
-    sessionStore.findById(sid).then(session => {
-      res.writeHead(session ? 200 : 404, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(session ?? { error: 'not found' }));
-    }).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    const session = await sessionStore.findById(sid);
+    res.writeHead(session ? 200 : 404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(session ?? { error: 'not found' }));
     return;
   }
   if (CAPTURE && req.method === 'POST' && path === '/api/dev/grant-role') {
-    (async () => {
+    await (async () => {
       let data = '';
       await new Promise<void>((resolve, reject) => {
         req.on('data', (c) => (data += c));
@@ -467,7 +475,7 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
       await userStore.setRole(user.id, role as 'user' | 'moderator' | 'admin');
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: true }));
-    })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    })();
     return;
   }
   res.writeHead(404);
