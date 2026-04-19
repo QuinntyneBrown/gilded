@@ -1,0 +1,123 @@
+<div class="notes-wrapper">
+  <h1 class="page-title">My Notes</h1>
+
+  <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+
+    <mat-tab label="Private">
+      <div class="tab-content">
+        <mat-form-field appearance="outline" class="create-field">
+          <mat-label>New private note</mat-label>
+          <textarea matInput rows="3" [value]="privateBody()" (input)="privateBody.set($any($event).target.value)" data-create-body></textarea>
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="createPrivate()" data-create-submit>Save</button>
+
+        <div class="notes-list">
+          @for (note of privateNotes(); track note.id) {
+            <mat-card class="note-card" [attr.data-note]="note.id">
+              @if (editingId() !== note.id) {
+                <mat-card-content>
+                  <p class="note-text" data-note-body>{{ note.body }}</p>
+                  <mat-card-actions>
+                    <button mat-icon-button (click)="startEdit(note)" data-note-edit aria-label="Edit">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deletePrivate(note.id)" data-note-delete aria-label="Delete">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </mat-card-actions>
+                </mat-card-content>
+              } @else {
+                <mat-card-content>
+                  <mat-form-field appearance="outline" class="edit-field">
+                    <textarea matInput rows="3" [value]="editBody()" (input)="editBody.set($any($event).target.value)" data-edit-body></textarea>
+                  </mat-form-field>
+                  <mat-card-actions>
+                    <button mat-button color="primary" (click)="saveEdit(note)" data-edit-save>Save</button>
+                    <button mat-button (click)="cancelEdit()">Cancel</button>
+                  </mat-card-actions>
+                </mat-card-content>
+              }
+            </mat-card>
+          }
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Spouse" [disabled]="!user()?.coupleId">
+      <div class="tab-content">
+        @if (user()?.coupleId) {
+          <mat-form-field appearance="outline" class="create-field">
+            <mat-label>New shared note</mat-label>
+            <textarea matInput rows="3" [value]="spouseBody()" (input)="spouseBody.set($any($event).target.value)" data-create-body></textarea>
+          </mat-form-field>
+          <button mat-raised-button color="primary" (click)="createSpouse()" data-create-submit>Save</button>
+
+          <div class="notes-list">
+            @for (note of spouseNotes(); track note.id) {
+              <mat-card class="note-card" [attr.data-note]="note.id">
+                @if (editingId() !== note.id) {
+                  <mat-card-content>
+                    <p class="note-text" data-note-body>{{ note.body }}</p>
+                    <mat-card-actions>
+                      <button mat-icon-button (click)="startEdit(note)" data-note-edit aria-label="Edit">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="deleteSpouse(note.id)" data-note-delete aria-label="Delete">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </mat-card-actions>
+                  </mat-card-content>
+                } @else {
+                  <mat-card-content>
+                    <mat-form-field appearance="outline" class="edit-field">
+                      <textarea matInput rows="3" [value]="editBody()" (input)="editBody.set($any($event).target.value)" data-edit-body></textarea>
+                    </mat-form-field>
+                    <mat-card-actions>
+                      <button mat-button color="primary" (click)="saveEdit(note)" data-edit-save>Save</button>
+                      <button mat-button (click)="cancelEdit()">Cancel</button>
+                    </mat-card-actions>
+                  </mat-card-content>
+                }
+              </mat-card>
+            }
+          </div>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Public">
+      <div class="tab-content">
+        <mat-form-field appearance="outline" class="create-field">
+          <mat-label>Share a public reflection</mat-label>
+          <textarea matInput rows="3" [value]="publicBody()" (input)="publicBody.set($any($event).target.value)" data-create-body></textarea>
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="createPublic()" data-create-submit>Post</button>
+
+        <div class="notes-list">
+          @for (note of publicNotes(); track note.id) {
+            <mat-card class="note-card" [attr.data-note]="note.id">
+              <mat-card-header>
+                <mat-card-subtitle data-author-display>{{ note.authorDisplay }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="note-text" data-note-body>{{ note.body }}</p>
+                @if (isOwn(note)) {
+                  <mat-card-actions>
+                    <button mat-icon-button color="warn" (click)="deletePublic(note.id)" data-note-delete aria-label="Delete">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </mat-card-actions>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+
+  @if (!user()?.coupleId) {
+    <p class="spouse-hint" data-spouse-disabled>Link with a spouse first to use shared notes.</p>
+  }
+</div>

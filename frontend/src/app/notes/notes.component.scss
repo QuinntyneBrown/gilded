@@ -1,0 +1,43 @@
+.notes-wrapper {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.page-title {
+  margin-bottom: 16px;
+}
+
+.tab-content {
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.create-field,
+.edit-field {
+  width: 100%;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.note-card {
+  width: 100%;
+}
+
+.note-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.spouse-hint {
+  margin-top: 8px;
+  color: var(--mat-sys-on-surface-variant, #555);
+  font-size: 0.875rem;
+}
