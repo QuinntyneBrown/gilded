@@ -62,7 +62,7 @@ Establish the Playwright test infrastructure that every downstream UI task will 
 4. Given a spec calls `AppShellPage.openSidenav()` at 360 px, when invoked, then the sidenav is opened; at 1280 px the same call is a no-op because the sidenav is already pinned (covered by a spec assertion).
 
 ## Done When
-- [ ] Acceptance tests green on all browsers at all viewports in CI.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
-- [ ] `BasePage` < 30 lines; `AppShellPage` holds only domain methods, no public locator getters.
+- [x] Acceptance tests green on all browsers at all viewports in CI.
+- [x] Verification check answered.
+- [x] Two commits recorded.
+- [x] `BasePage` < 30 lines; `AppShellPage` holds only domain methods, no public locator getters.
