@@ -54,8 +54,8 @@ Ship a one-shot, idempotent seed command `npm run seed:counsellors` that parses 
 5. Given the seed runs against the real PT URLs and any network error occurs on photo fetch, when the error is caught, then the row is still inserted with `photoUrl=null` and the seed process continues (no aborted run).
 
 ## Done When
-- [ ] Acceptance tests green (parser, idempotency, Playwright render check).
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
-- [ ] Running `npm run seed:counsellors` against the real MD file from the project root seeds 108 rows.
-- [ ] Every profile renders a photo or the placeholder avatar.
+- [x] Acceptance tests green (parser, idempotency, Playwright render check).
+- [x] Verification check answered.
+- [x] Two commits recorded.
+- [x] Running `npm run seed:counsellors` against the real MD file from the project root seeds 108 rows.
+- [x] Every profile renders a photo or the placeholder avatar.
