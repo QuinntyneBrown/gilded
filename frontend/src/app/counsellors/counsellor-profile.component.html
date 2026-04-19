@@ -23,7 +23,7 @@
           <h1 class="profile-name">{{ c.name }}</h1>
           <p class="profile-denomination">{{ c.denomination }}</p>
           @if (c.rating !== null) {
-            <p class="profile-rating">
+            <p class="profile-rating" data-testid="rating-display">
               <mat-icon aria-hidden="true">star</mat-icon>
               {{ c.rating }} &mdash; {{ c.reviewCount }} review{{ c.reviewCount === 1 ? '' : 's' }}
             </p>
@@ -91,6 +91,26 @@
 
         <div class="profile-right">
           <mat-card class="actions-card">
+            <mat-card-content>
+              <div class="rating-section">
+                <p class="section-label">Rate this counsellor</p>
+                <div class="star-row">
+                  @for (star of stars; track star) {
+                    <button
+                      mat-icon-button
+                      [attr.data-star]="star"
+                      [attr.aria-label]="star + ' stars'"
+                      (click)="submitRating(star)"
+                      (mouseenter)="ratingHover.set(star)"
+                      (mouseleave)="ratingHover.set(0)"
+                      class="star-btn"
+                    >
+                      <mat-icon>{{ (ratingHover() || ratingPick()) >= star ? 'star' : 'star_border' }}</mat-icon>
+                    </button>
+                  }
+                </div>
+              </div>
+            </mat-card-content>
             <mat-card-actions>
               <button mat-raised-button color="accent" (click)="shortlist()">
                 <mat-icon>bookmark_add</mat-icon>
@@ -98,18 +118,103 @@
               </button>
             </mat-card-actions>
           </mat-card>
-
-          <mat-card class="reviews-card">
-            <mat-card-header>
-              <mat-card-title>Reviews</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              @if (c.reviewCount === 0) {
-                <p class="no-reviews">No reviews yet.</p>
-              }
-            </mat-card-content>
-          </mat-card>
         </div>
+      </div>
+
+      <mat-divider />
+
+      <div class="reviews-section">
+        <h2 class="section-title reviews-title">Reviews</h2>
+
+        <div class="review-form">
+          <mat-form-field appearance="outline" class="review-field">
+            <mat-label>Write a review</mat-label>
+            <textarea
+              matInput
+              data-review-body
+              [value]="reviewBody()"
+              (input)="reviewBody.set($any($event.target).value)"
+              rows="4"
+              maxlength="4000"
+            ></textarea>
+            <mat-hint align="end">{{ reviewCharCount() }} / 4000</mat-hint>
+          </mat-form-field>
+          <button mat-raised-button color="primary" (click)="submitReview()" class="submit-review-btn">
+            <mat-icon>rate_review</mat-icon>
+            Submit Review
+          </button>
+        </div>
+
+        @if (reviews().length === 0) {
+          <p class="no-reviews">No reviews yet.</p>
+        }
+
+        @for (review of pagedReviews(); track review.id) {
+          <mat-card class="review-card" [attr.data-review]="review.id">
+            <mat-card-content>
+              <div class="review-header">
+                <p class="review-body">{{ review.body }}</p>
+                @if (review.authorId === userId()) {
+                  <button
+                    mat-icon-button
+                    [matMenuTriggerFor]="reviewMenu"
+                    data-review-menu
+                    aria-label="Review options"
+                    class="review-menu-btn"
+                  >
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #reviewMenu>
+                    <button mat-menu-item (click)="deleteReview(review.id)">
+                      <mat-icon>delete</mat-icon>
+                      Delete
+                    </button>
+                  </mat-menu>
+                }
+              </div>
+              <p class="review-meta">{{ review.createdAt | date:'mediumDate' }}</p>
+            </mat-card-content>
+
+            <mat-expansion-panel (opened)="loadComments(review.id)">
+              <mat-expansion-panel-header>
+                <mat-panel-title>Comments ({{ commentsFor(review.id).length }})</mat-panel-title>
+              </mat-expansion-panel-header>
+
+              @for (comment of commentsFor(review.id); track comment.id) {
+                <div class="comment" [attr.data-comment]="comment.id">
+                  <p class="comment-body">{{ comment.body }}</p>
+                </div>
+              }
+
+              <div class="comment-form">
+                <mat-form-field appearance="outline" class="comment-field">
+                  <mat-label>Add a comment</mat-label>
+                  <input
+                    matInput
+                    data-comment-body
+                    [value]="commentBodies()[review.id] ?? ''"
+                    (input)="onCommentInput(review.id, $event)"
+                    maxlength="1000"
+                  />
+                </mat-form-field>
+                <button mat-button (click)="submitComment(review.id)">
+                  <mat-icon>send</mat-icon>
+                  Add Comment
+                </button>
+              </div>
+            </mat-expansion-panel>
+          </mat-card>
+        }
+
+        @if (reviews().length > pageSize) {
+          <mat-paginator
+            [length]="reviews().length"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex()"
+            (page)="onPage($event)"
+            aria-label="Reviews pagination"
+          />
+        }
       </div>
     </mat-card>
   }
