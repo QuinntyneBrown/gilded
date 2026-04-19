@@ -20,7 +20,8 @@ export class LayoutState {
       Breakpoints.Medium,
       Breakpoints.Large,
       Breakpoints.XLarge,
-      Breakpoints.Handset,
+      Breakpoints.HandsetPortrait,
+      Breakpoints.HandsetLandscape,
     ])
     .pipe(
       map(({ breakpoints: bp }) => {
@@ -29,7 +30,8 @@ export class LayoutState {
         else if (bp[Breakpoints.Large]) viewport = 'l';
         else if (bp[Breakpoints.Medium]) viewport = 'm';
         else if (bp[Breakpoints.Small]) viewport = 's';
-        return { viewport, isHandset: bp[Breakpoints.Handset] ?? false };
+        const isHandset = !!(bp[Breakpoints.HandsetPortrait] || bp[Breakpoints.HandsetLandscape]);
+        return { viewport, isHandset };
       }),
       shareReplay(1),
     );

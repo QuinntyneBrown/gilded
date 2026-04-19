@@ -10,7 +10,8 @@ import { LayoutState, LayoutStateSnapshot } from './layout-state';
 function mockBreakpoints(active: string[]): Partial<BreakpointObserver> {
   const bp: Record<string, boolean> = {};
   [Breakpoints.XSmall, Breakpoints.Small, Breakpoints.Medium,
-   Breakpoints.Large, Breakpoints.XLarge, Breakpoints.Handset].forEach(b => {
+   Breakpoints.Large, Breakpoints.XLarge,
+   Breakpoints.HandsetPortrait, Breakpoints.HandsetLandscape].forEach(b => {
     bp[b] = active.includes(b);
   });
   return { observe: () => of({ matches: active.length > 0, breakpoints: bp } as BreakpointState) };
@@ -29,8 +30,8 @@ function setup(active: string[]): LayoutState {
 describe('LayoutState', () => {
   let result: LayoutStateSnapshot;
 
-  it('emits xs + isHandset=true for XSmall + Handset', fakeAsync(() => {
-    setup([Breakpoints.XSmall, Breakpoints.Handset]).state$.subscribe(s => (result = s));
+  it('emits xs + isHandset=true for XSmall + HandsetPortrait', fakeAsync(() => {
+    setup([Breakpoints.XSmall, Breakpoints.HandsetPortrait]).state$.subscribe(s => (result = s));
     tick();
     expect(result.viewport).toBe('xs');
     expect(result.isHandset).toBeTrue();

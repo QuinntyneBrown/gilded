@@ -16,3 +16,5 @@ jobs:
       - run: npm run lint:ui
       - run: npm test
       - run: npm run test:lint
+      - run: npx playwright install --with-deps
+      - run: npm run e2e
