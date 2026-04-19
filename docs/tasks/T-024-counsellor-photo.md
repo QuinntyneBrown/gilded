@@ -43,6 +43,6 @@ Let admins/moderators attach a photo to a counsellor and serve it. When no photo
 - Counsellors with no photo render the placeholder avatar.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
