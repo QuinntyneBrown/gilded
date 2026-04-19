@@ -54,7 +54,7 @@ export function createCreatePublicNoteHandler({ noteStore, sessionStore, userSto
   };
 }
 
-export function createGetPublicFeedHandler({ noteStore, sessionStore }: { noteStore: NoteStore; sessionStore: SessionStore }) {
+export function createGetPublicFeedHandler({ noteStore, sessionStore, userStore }: PublicNoteDeps) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     const session = await requireSession(req, sessionStore);
     if (!session) { res.writeHead(401, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Authentication required.' })); return; }
@@ -62,8 +62,12 @@ export function createGetPublicFeedHandler({ noteStore, sessionStore }: { noteSt
     const offset = Number(urlParsed.searchParams.get('offset') ?? '0');
     const limit = 20;
     const notes = await noteStore.findPublic(offset, limit);
+    const items = await Promise.all(notes.map(async n => {
+      const author = await userStore.findById(n.authorId);
+      return { id: n.id, body: n.body ?? '', visibility: n.visibility, authorId: n.authorId, authorDisplay: displayName(author?.email ?? ''), createdAt: n.createdAt.toISOString(), updatedAt: n.updatedAt.toISOString() };
+    }));
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(notes.map(n => ({ id: n.id, body: n.body ?? '', visibility: n.visibility, authorId: n.authorId, createdAt: n.createdAt.toISOString(), updatedAt: n.updatedAt.toISOString() }))));
+    res.end(JSON.stringify(items));
   };
 }
 
