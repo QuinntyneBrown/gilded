@@ -116,7 +116,18 @@ export function createMeHandler(deps: LoginDeps) {
       return;
     }
     const user = await deps.userStore.findById(session.userId);
+    let spouseEmail: string | null = null;
+    if (user?.spouseId) {
+      const spouse = await deps.userStore.findById(user.spouseId);
+      spouseEmail = spouse?.email ?? null;
+    }
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ userId: session.userId, email: user?.email }));
+    res.end(JSON.stringify({
+      userId: session.userId,
+      email: user?.email,
+      coupleId: user?.coupleId ?? null,
+      spouseId: user?.spouseId ?? null,
+      spouseEmail,
+    }));
   };
 }
