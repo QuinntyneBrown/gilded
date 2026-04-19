@@ -70,7 +70,8 @@
               "buildTarget": "gilded:build:production"
             },
             "development": {
-              "buildTarget": "gilded:build:development"
+              "buildTarget": "gilded:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

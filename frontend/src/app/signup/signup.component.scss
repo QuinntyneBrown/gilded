@@ -1,0 +1,54 @@
+.signup-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.signup-card {
+  width: 100%;
+
+  @media (min-width: 768px) {
+    max-width: 480px;
+  }
+}
+
+.signup-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0 0 24px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.submit-btn {
+  margin-top: 16px;
+  min-height: 44px;
+}
+
+.confirmation {
+  text-align: center;
+  padding: 32px 16px;
+
+  .confirm-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--mat-sys-primary);
+  }
+
+  h2 {
+    margin: 16px 0 8px;
+  }
+
+  p {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.server-error {
+  color: var(--mat-sys-error);
+  margin: 8px 0;
+  font-size: 0.875rem;
+}

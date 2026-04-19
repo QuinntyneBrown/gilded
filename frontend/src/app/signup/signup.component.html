@@ -1,0 +1,52 @@
+<div class="signup-wrapper">
+  @if (confirmed()) {
+    <div class="signup-card confirmation">
+      <mat-icon class="confirm-icon">mark_email_read</mat-icon>
+      <h2>Check your email</h2>
+      <p>If this address is new to Gilded, a verification link is on its way.</p>
+    </div>
+  } @else {
+    <div class="signup-card">
+      <h1 class="signup-title">Create account</h1>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+          @if (form.controls.email.touched && form.controls.email.hasError('required')) {
+            <mat-error>Email is required.</mat-error>
+          } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
+            <mat-error>Enter a valid email address.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" autocomplete="new-password" />
+          <mat-hint>12+ characters with uppercase, lowercase, digit and symbol.</mat-hint>
+          @if (form.controls.password.touched && form.controls.password.hasError('passwordPolicy')) {
+            <mat-error>Password must be 12+ chars with uppercase, lowercase, digit and symbol.</mat-error>
+          }
+        </mat-form-field>
+
+        @if (serverError()) {
+          <p class="server-error">{{ serverError() }}</p>
+        }
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="full-width submit-btn"
+          [disabled]="submitting()"
+        >
+          @if (submitting()) {
+            <mat-progress-spinner mode="indeterminate" diameter="20" />
+          } @else {
+            Sign up
+          }
+        </button>
+      </form>
+    </div>
+  }
+</div>
