@@ -1,0 +1,70 @@
+<div class="add-counsellor-wrapper">
+  @if (submitted()) {
+    <mat-card>
+      <mat-card-content>
+        <p data-state="pending-review">Your submission is pending review. You will be notified once it is approved.</p>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Add a Counsellor</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+          <h3>Identity</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Full Name</mat-label>
+            <input matInput formControlName="name" data-field="name" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Denomination</mat-label>
+            <input matInput formControlName="denomination" data-field="denomination" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Credentials (comma-separated)</mat-label>
+            <input matInput formControlName="credentials" data-field="credentials" />
+          </mat-form-field>
+
+          <h3>Faith & Specialties</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Specialties (comma-separated)</mat-label>
+            <input matInput formControlName="specialties" data-field="specialties" />
+          </mat-form-field>
+
+          <h3>Contact</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phone" data-field="phone" type="tel" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" data-field="email" type="email" />
+          </mat-form-field>
+
+          <h3>Address</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Address</mat-label>
+            <input matInput formControlName="address" data-field="address" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Postal / ZIP Code</mat-label>
+            <input matInput formControlName="postalCode" data-field="postalCode" />
+            @if (form.controls.postalCode.errors?.['postalCode']) {
+              <mat-error>Enter a valid Canadian postal code or US ZIP code.</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button mat-raised-button color="primary" type="submit" data-action="submit">Submit for Review</button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

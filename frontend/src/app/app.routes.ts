@@ -26,6 +26,10 @@ export const routes: Routes = [
     loadComponent: () => import('./settings/spouse-settings.component').then(m => m.SpouseSettingsPageComponent),
   },
   {
+    path: 'counsellors/new',
+    loadComponent: () => import('./counsellors/add-counsellor.component').then(m => m.AddCounsellorPageComponent),
+  },
+  {
     path: 'counsellors/:id',
     loadComponent: () => import('./counsellors/counsellor-profile.component').then(m => m.CounsellorProfilePageComponent),
   },
