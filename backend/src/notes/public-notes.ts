@@ -92,6 +92,26 @@ export function createUpdatePublicNoteHandler({ noteStore, sessionStore, userSto
   };
 }
 
+export function createGetNoteByIdHandler({ noteStore, sessionStore, userStore }: PublicNoteDeps) {
+  return async (req: IncomingMessage, res: ServerResponse, noteId: string): Promise<void> => {
+    const session = await requireSession(req, sessionStore);
+    if (!session) { res.writeHead(401, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Authentication required.' })); return; }
+
+    const note = await noteStore.findById(noteId);
+    if (!note || note.deletedAt) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Not found.' })); return; }
+
+    if (note.visibility === 'private') {
+      if (note.authorId !== session.userId) { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Forbidden.' })); return; }
+    } else if (note.visibility === 'spouse') {
+      const user = await userStore.findById(session.userId);
+      if (!user?.coupleId || user.coupleId !== note.coupleId) { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Forbidden.' })); return; }
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ id: note.id, visibility: note.visibility, createdAt: note.createdAt.toISOString(), updatedAt: note.updatedAt.toISOString() }));
+  };
+}
+
 export function createDeletePublicNoteHandler({ noteStore, sessionStore }: { noteStore: NoteStore; sessionStore: SessionStore }) {
   return async (req: IncomingMessage, res: ServerResponse, noteId: string): Promise<void> => {
     const session = await requireSession(req, sessionStore);
