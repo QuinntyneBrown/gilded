@@ -33,6 +33,7 @@ export interface UserStore {
   deleteResetToken(tokenHash: string): Promise<void>;
   deleteResetTokensByUserId(userId: string): Promise<void>;
   updateCouple(userId: string, coupleId: string, spouseId: string): Promise<void>;
+  clearCouple(userId: string): Promise<void>;
 }
 
 export class InMemoryUserStore implements UserStore {
@@ -107,5 +108,10 @@ export class InMemoryUserStore implements UserStore {
   async updateCouple(userId: string, coupleId: string, spouseId: string): Promise<void> {
     const user = this.byId.get(userId);
     if (user) { user.coupleId = coupleId; user.spouseId = spouseId; }
+  }
+
+  async clearCouple(userId: string): Promise<void> {
+    const user = this.byId.get(userId);
+    if (user) { delete user.coupleId; delete user.spouseId; }
   }
 }

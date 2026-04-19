@@ -19,6 +19,7 @@ export interface CoupleStore {
   findInviteByHash(tokenHash: string): Promise<CoupleInvite | null>;
   deleteInvite(tokenHash: string): Promise<void>;
   deleteInvitesByInviter(inviterId: string): Promise<void>;
+  deleteCouple(coupleId: string): Promise<void>;
 }
 
 export class InMemoryCoupleStore implements CoupleStore {
@@ -47,5 +48,9 @@ export class InMemoryCoupleStore implements CoupleStore {
 
   async deleteInvitesByInviter(inviterId: string): Promise<void> {
     this.invites = this.invites.filter(i => i.inviterId !== inviterId);
+  }
+
+  async deleteCouple(coupleId: string): Promise<void> {
+    this.couples.delete(coupleId);
   }
 }
