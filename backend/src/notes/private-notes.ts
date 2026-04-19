@@ -1,8 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { z } from 'zod';
 import type { NoteStore, Note } from './note.ts';
 import type { SessionStore } from '../auth/session-store.ts';
 import { NoteCrypto } from './note-crypto.ts';
+import { parseBody } from '../parse-body.ts';
+
+const NoteBodySchema = z.object({ body: z.string() });
 
 const NOTE_MASTER_KEY = process.env['NOTE_MASTER_KEY'] ?? 'a'.repeat(64);
 const crypto = new NoteCrypto(NOTE_MASTER_KEY);
@@ -31,13 +35,12 @@ export function createCreatePrivateNoteHandler({ noteStore, sessionStore }: { no
     const session = await requireSession(req, sessionStore);
     if (!session) { res.writeHead(401, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Authentication required.' })); return; }
 
-    let data = '';
-    await new Promise<void>((resolve, reject) => { req.on('data', c => (data += c)); req.on('end', () => resolve()); req.on('error', reject); });
-    const { body } = JSON.parse(data) as { body?: string };
-    if (!body || String(body).trim().length === 0) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'body required.' })); return; }
+    const parsed = await parseBody(req, res, NoteBodySchema);
+    if (!parsed) return;
+    if (!parsed.body.trim()) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'body required.' })); return; }
 
     const keyId = `user-${session.userId}`;
-    const { ciphertext, iv } = crypto.encrypt(String(body).trim(), keyId);
+    const { ciphertext, iv } = crypto.encrypt(parsed.body.trim(), keyId);
     const now = new Date();
     const note: Note = { id: randomUUID(), authorId: session.userId, visibility: 'private', ciphertext, iv, keyId, createdAt: now, updatedAt: now };
     await noteStore.create(note);
@@ -65,13 +68,12 @@ export function createUpdatePrivateNoteHandler({ noteStore, sessionStore }: { no
     if (!note || note.visibility !== 'private') { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Not found.' })); return; }
     if (note.authorId !== session.userId) { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Forbidden.' })); return; }
 
-    let data = '';
-    await new Promise<void>((resolve, reject) => { req.on('data', c => (data += c)); req.on('end', () => resolve()); req.on('error', reject); });
-    const { body } = JSON.parse(data) as { body?: string };
-    if (!body || String(body).trim().length === 0) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'body required.' })); return; }
+    const parsed = await parseBody(req, res, NoteBodySchema);
+    if (!parsed) return;
+    if (!parsed.body.trim()) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'body required.' })); return; }
 
     const keyId = `user-${session.userId}`;
-    const { ciphertext, iv } = crypto.encrypt(String(body).trim(), keyId);
+    const { ciphertext, iv } = crypto.encrypt(parsed.body.trim(), keyId);
     const updatedAt = new Date();
     await noteStore.update(noteId, { ciphertext, iv, updatedAt });
 

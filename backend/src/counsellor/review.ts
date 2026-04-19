@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { z } from 'zod';
 import type { CounsellorStore } from './counsellor-store.ts';
 import type { ReviewStore, Review } from './review-store.ts';
 import type { SessionStore } from '../auth/session-store.ts';
@@ -7,6 +8,12 @@ import type { UserStore } from '../auth/user-store.ts';
 import { evaluate } from '../moderation/ruleset.ts';
 import type { SlidingWindowLimiter } from '../auth/global-rate-limiter.ts';
 import type { CaptchaVerifier } from '../auth/captcha.ts';
+import { parseBody } from '../parse-body.ts';
+
+const PostReviewSchema = z.object({
+  body: z.string(),
+  captchaToken: z.string().optional(),
+});
 
 interface ReviewDeps {
   counsellorStore: CounsellorStore;
@@ -54,13 +61,9 @@ export function createPostReviewHandler({ counsellorStore, reviewStore, sessionS
       return;
     }
 
-    let data = '';
-    await new Promise<void>((resolve, reject) => {
-      req.on('data', (c) => (data += c));
-      req.on('end', () => resolve());
-      req.on('error', reject);
-    });
-    const { body, captchaToken } = JSON.parse(data) as { body?: string; captchaToken?: string };
+    const parsed = await parseBody(req, res, PostReviewSchema);
+    if (!parsed) return;
+    const { body, captchaToken } = parsed;
 
     if (captchaVerifier) {
       if (typeof captchaToken !== 'string' || !captchaToken) {

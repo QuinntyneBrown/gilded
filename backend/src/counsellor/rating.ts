@@ -1,7 +1,11 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { z } from 'zod';
 import type { CounsellorStore } from './counsellor-store.ts';
 import type { RatingStore } from './rating-store.ts';
 import type { SessionStore } from '../auth/session-store.ts';
+import { parseBody } from '../parse-body.ts';
+
+const RatingSchema = z.object({ stars: z.number().int().min(1).max(5) });
 
 interface RatingDeps {
   counsellorStore: CounsellorStore;
@@ -32,19 +36,9 @@ export function createRateCounsellorHandler({ counsellorStore, ratingStore, sess
       return;
     }
 
-    let data = '';
-    await new Promise<void>((resolve, reject) => {
-      req.on('data', (c) => (data += c));
-      req.on('end', () => resolve());
-      req.on('error', reject);
-    });
-    const body = JSON.parse(data) as { stars?: unknown };
-    const stars = Number(body.stars);
-    if (!Number.isInteger(stars) || stars < 1 || stars > 5) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'stars must be an integer between 1 and 5.' }));
-      return;
-    }
+    const parsed = await parseBody(req, res, RatingSchema);
+    if (!parsed) return;
+    const { stars } = parsed;
 
     await ratingStore.upsert(session.userId, id, stars);
 

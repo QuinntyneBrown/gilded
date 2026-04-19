@@ -1,10 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { z } from 'zod';
 import type { NoteStore, Note } from './note.ts';
 import type { SessionStore } from '../auth/session-store.ts';
 import type { UserStore } from '../auth/user-store.ts';
 import { evaluate } from '../moderation/ruleset.ts';
 import type { SlidingWindowLimiter } from '../auth/global-rate-limiter.ts';
+import { parseBody } from '../parse-body.ts';
+
+const NoteBodySchema = z.object({ body: z.string() });
 
 function parseCookies(header: string): Record<string, string> {
   return Object.fromEntries(
@@ -41,10 +45,9 @@ export function createCreatePublicNoteHandler({ noteStore, sessionStore, userSto
       if (limited) { res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSecs) }); res.end(JSON.stringify({ error: 'Too many creations. Try again later.' })); return; }
     }
 
-    let data = '';
-    await new Promise<void>((resolve, reject) => { req.on('data', c => (data += c)); req.on('end', () => resolve()); req.on('error', reject); });
-    const { body } = JSON.parse(data) as { body?: string };
-    const text = String(body ?? '').trim();
+    const parsed = await parseBody(req, res, NoteBodySchema);
+    if (!parsed) return;
+    const text = parsed.body.trim();
     if (!text) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'body required.' })); return; }
 
     const modResult = evaluate(text);
@@ -85,10 +88,9 @@ export function createUpdatePublicNoteHandler({ noteStore, sessionStore, userSto
     if (!note || note.visibility !== 'public' || note.deletedAt) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Not found.' })); return; }
     if (note.authorId !== session.userId) { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Forbidden.' })); return; }
 
-    let data = '';
-    await new Promise<void>((resolve, reject) => { req.on('data', c => (data += c)); req.on('end', () => resolve()); req.on('error', reject); });
-    const { body } = JSON.parse(data) as { body?: string };
-    const text = String(body ?? '').trim();
+    const parsed = await parseBody(req, res, NoteBodySchema);
+    if (!parsed) return;
+    const text = parsed.body.trim();
     if (!text) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'body required.' })); return; }
 
     const modResult = evaluate(text);

@@ -1,9 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { z } from 'zod';
 import type { NoteStore, Note } from './note.ts';
 import type { SessionStore } from '../auth/session-store.ts';
 import type { UserStore } from '../auth/user-store.ts';
 import { NoteCrypto } from './note-crypto.ts';
+import { parseBody } from '../parse-body.ts';
+
+const NoteBodySchema = z.object({ body: z.string() });
 
 const NOTE_MASTER_KEY = process.env['NOTE_MASTER_KEY'] ?? 'a'.repeat(64);
 const crypto = new NoteCrypto(NOTE_MASTER_KEY);
@@ -40,13 +44,12 @@ export function createCreateSpouseNoteHandler({ noteStore, sessionStore, userSto
     const user = await userStore.findById(session.userId);
     if (!user?.coupleId) { res.writeHead(409, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Must be in a couple to create a spouse note.' })); return; }
 
-    let data = '';
-    await new Promise<void>((resolve, reject) => { req.on('data', c => (data += c)); req.on('end', () => resolve()); req.on('error', reject); });
-    const { body } = JSON.parse(data) as { body?: string };
-    if (!body || String(body).trim().length === 0) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'body required.' })); return; }
+    const parsed = await parseBody(req, res, NoteBodySchema);
+    if (!parsed) return;
+    if (!parsed.body.trim()) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'body required.' })); return; }
 
     const keyId = `couple-${user.coupleId}`;
-    const { ciphertext, iv } = crypto.encrypt(String(body).trim(), keyId);
+    const { ciphertext, iv } = crypto.encrypt(parsed.body.trim(), keyId);
     const now = new Date();
     const note: Note = { id: randomUUID(), authorId: session.userId, coupleId: user.coupleId, visibility: 'spouse', ciphertext, iv, keyId, createdAt: now, updatedAt: now };
     await noteStore.create(note);
@@ -76,13 +79,12 @@ export function createUpdateSpouseNoteHandler({ noteStore, sessionStore }: { not
     if (!note || note.visibility !== 'spouse' || note.deletedAt) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Not found.' })); return; }
     if (note.authorId !== session.userId) { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Forbidden.' })); return; }
 
-    let data = '';
-    await new Promise<void>((resolve, reject) => { req.on('data', c => (data += c)); req.on('end', () => resolve()); req.on('error', reject); });
-    const { body } = JSON.parse(data) as { body?: string };
-    if (!body || String(body).trim().length === 0) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'body required.' })); return; }
+    const parsed = await parseBody(req, res, NoteBodySchema);
+    if (!parsed) return;
+    if (!parsed.body.trim()) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'body required.' })); return; }
 
     const keyId = note.keyId!;
-    const { ciphertext, iv } = crypto.encrypt(String(body).trim(), keyId);
+    const { ciphertext, iv } = crypto.encrypt(parsed.body.trim(), keyId);
     await noteStore.update(noteId, { ciphertext, iv, updatedAt: new Date() });
     const updated = await noteStore.findById(noteId);
     res.writeHead(200, { 'Content-Type': 'application/json' });

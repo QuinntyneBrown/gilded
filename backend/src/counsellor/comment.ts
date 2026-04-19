@@ -1,11 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { z } from 'zod';
 import type { CommentStore, Comment } from './comment-store.ts';
 import type { ReviewStore } from './review-store.ts';
 import type { SessionStore } from '../auth/session-store.ts';
 import type { UserStore } from '../auth/user-store.ts';
 import { evaluate } from '../moderation/ruleset.ts';
 import type { SlidingWindowLimiter } from '../auth/global-rate-limiter.ts';
+import { parseBody } from '../parse-body.ts';
+
+const PostCommentSchema = z.object({ body: z.string() });
 
 interface CommentDeps {
   commentStore: CommentStore;
@@ -52,14 +56,9 @@ export function createPostCommentHandler({ commentStore, reviewStore, sessionSto
       return;
     }
 
-    let data = '';
-    await new Promise<void>((resolve, reject) => {
-      req.on('data', (c) => (data += c));
-      req.on('end', () => resolve());
-      req.on('error', reject);
-    });
-    const { body } = JSON.parse(data) as { body?: string };
-    const text = String(body ?? '').trim();
+    const parsed = await parseBody(req, res, PostCommentSchema);
+    if (!parsed) return;
+    const text = String(parsed.body ?? '').trim();
 
     if (text.length < 1 || text.length > 1000) {
       res.writeHead(400, { 'Content-Type': 'application/json' });

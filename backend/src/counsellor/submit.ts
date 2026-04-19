@@ -1,7 +1,21 @@
 import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { z } from 'zod';
 import type { CounsellorStore } from './counsellor-store.ts';
 import type { SessionStore } from '../auth/session-store.ts';
+import { parseBody } from '../parse-body.ts';
+
+const SubmitCounsellorSchema = z.object({
+  name: z.string(),
+  denomination: z.string(),
+  address: z.string(),
+  phone: z.string().optional().default(''),
+  email: z.string().optional().default(''),
+  credentials: z.array(z.string()).optional().default([]),
+  specialties: z.array(z.string()).optional().default([]),
+  website: z.string().optional(),
+  bookingLink: z.string().optional(),
+});
 
 interface SubmitDeps {
   counsellorStore: CounsellorStore;
@@ -26,19 +40,14 @@ export function createSubmitCounsellorHandler({ counsellorStore, sessionStore }:
       return;
     }
 
-    let data = '';
-    await new Promise<void>((resolve, reject) => {
-      req.on('data', (c) => (data += c));
-      req.on('end', () => resolve());
-      req.on('error', reject);
-    });
-    const body = JSON.parse(data) as Record<string, unknown>;
+    const parsed = await parseBody(req, res, SubmitCounsellorSchema);
+    if (!parsed) return;
 
-    const name = String(body['name'] ?? '').trim();
-    const denomination = String(body['denomination'] ?? '').trim();
-    const address = String(body['address'] ?? '').trim();
-    const phone = String(body['phone'] ?? '').trim();
-    const email = String(body['email'] ?? '').trim();
+    const name = parsed.name.trim();
+    const denomination = parsed.denomination.trim();
+    const address = parsed.address.trim();
+    const phone = parsed.phone.trim();
+    const email = parsed.email.trim();
 
     if (!name) {
       res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -76,14 +85,14 @@ export function createSubmitCounsellorHandler({ counsellorStore, sessionStore }:
       name,
       normalizedName,
       denomination,
-      credentials: (body['credentials'] as string[]) ?? [],
-      specialties: (body['specialties'] as string[]) ?? [],
+      credentials: parsed.credentials,
+      specialties: parsed.specialties,
       address,
       normalizedAddress,
       phone,
       email,
-      website: body['website'] as string | undefined,
-      bookingLink: body['bookingLink'] as string | undefined,
+      website: parsed.website,
+      bookingLink: parsed.bookingLink,
       source: 'user_submitted',
       verified: false,
       submittedBy: session.userId,
