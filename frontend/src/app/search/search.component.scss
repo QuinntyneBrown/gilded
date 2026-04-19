@@ -1,0 +1,50 @@
+.search-wrapper {
+  padding: 24px 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.search-form-card {
+  margin-bottom: 24px;
+}
+
+.search-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.postal-field {
+  flex: 1 1 200px;
+}
+
+.radius-field {
+  flex: 0 0 120px;
+}
+
+.result-card {
+  margin-bottom: 16px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 32px;
+}
+
+.search-spinner {
+  display: block;
+  margin: 32px auto;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 0.875rem;
+}
+
+mat-paginator {
+  margin-top: 16px;
+}
