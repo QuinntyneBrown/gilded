@@ -28,6 +28,7 @@ export function createGetCounsellorHandler({ counsellorStore }: { counsellorStor
       photoUrl: counsellor.photoFilename ? `/api/counsellors/${counsellor.id}/photo` : (counsellor.photoUrl ?? null),
       rating: counsellor.reviewCount > 0 ? (counsellor.rating ?? null) : null,
       reviewCount: counsellor.reviewCount,
+      moderationState: counsellor.moderationState ?? null,
     }));
   };
 }

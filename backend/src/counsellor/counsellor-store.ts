@@ -23,6 +23,7 @@ export interface Counsellor {
   lat?: number;
   lng?: number;
   photoFilename?: string;
+  moderationState?: 'pending' | 'approved' | 'rejected';
 }
 
 export interface CounsellorStore {

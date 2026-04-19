@@ -8,6 +8,7 @@ import { createResetRequestHandler, createResetCompleteHandler } from './auth/re
 import { createInviteHandler, createAcceptHandler } from './couple/invite.ts';
 import { createUnlinkHandler } from './couple/unlink.ts';
 import { createGetCounsellorHandler } from './counsellor/counsellor.ts';
+import { createSubmitCounsellorHandler } from './counsellor/submit.ts';
 import { createUploadPhotoHandler, createServePhotoHandler } from './counsellor/photo.ts';
 import { createSearchCounsellorsHandler } from './counsellor/search.ts';
 import { GeocodingService } from './geo/geocoding.ts';
@@ -58,6 +59,7 @@ const inviteHandler = createInviteHandler({ userStore, coupleStore, mailer: auth
 const acceptHandler = createAcceptHandler({ userStore, coupleStore, mailer: authDeps.mailer, sessionStore });
 const unlinkHandler = createUnlinkHandler({ userStore, coupleStore, sessionStore, eventBus });
 const getCounsellorHandler = createGetCounsellorHandler({ counsellorStore });
+const submitCounsellorHandler = createSubmitCounsellorHandler({ counsellorStore, sessionStore });
 const uploadPhotoHandler = createUploadPhotoHandler({ counsellorStore });
 const servePhotoHandler = createServePhotoHandler({ counsellorStore });
 const searchCounsellorsHandler = createSearchCounsellorsHandler({ counsellorStore, geocodingService });
@@ -123,6 +125,10 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   if (req.method === 'GET' && path.startsWith('/api/counsellors/') && path.endsWith('/photo')) {
     const id = path.slice('/api/counsellors/'.length, -'/photo'.length);
     servePhotoHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path === '/api/counsellors') {
+    submitCounsellorHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (req.method === 'GET' && path === '/api/counsellors') {
