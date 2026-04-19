@@ -5,6 +5,7 @@ import { createVerifyHandler, createResendHandler } from './auth/verify.ts';
 import { createLoginHandler, createMeHandler } from './auth/login.ts';
 import { InMemoryUserStore } from './auth/user-store.ts';
 import { InMemorySessionStore } from './auth/session-store.ts';
+import { LoginRateLimiter } from './auth/rate-limit.ts';
 import { NodemailerMailer } from './auth/mailer.ts';
 import type { Mailer } from './auth/mailer.ts';
 
@@ -29,7 +30,7 @@ const sessionDeps = { userStore, sessionStore };
 const signupHandler = createSignupHandler(authDeps);
 const verifyHandler = createVerifyHandler(authDeps);
 const resendHandler = createResendHandler(authDeps);
-const loginHandler = createLoginHandler(sessionDeps);
+const loginHandler = createLoginHandler(sessionDeps, new LoginRateLimiter());
 const meHandler = createMeHandler(sessionDeps);
 
 export function handler(req: IncomingMessage, res: ServerResponse): void {
