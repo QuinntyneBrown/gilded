@@ -45,8 +45,16 @@ Stand up the repository as a working Angular 17+ application plus a backend skel
 2. Given both services are running, when the e2e suite runs, then it passes including the healthcheck assertion.
 3. Given the repo, when `npm run lint` and `npm run typecheck` are invoked, then both exit 0.
 
+## Verification Check
+1. **Simpler?** No file is longer than it needs to be. Placeholder template removed. Backend is minimal Node.js http — no framework.
+2. **Complete?** `npm run dev`, `npm test`, and the e2e pass from a fresh clone after `npm install`.
+3. **No temporary code?** Confirmed — no TODO/FIXME/stub/mock/placeholder in production code.
+4. **No stubs/mocks in prod code?** Confirmed. Mocks only in test files.
+5. **All tests pass locally?** Yes — backend unit test and e2e healthcheck green.
+6. **Lint + typecheck green?** Yes — `npm run lint` and `npm run typecheck` both exit 0.
+
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered in writing.
-- [ ] Two commits on record (RED, GREEN), or three if a simplify pass occurred.
-- [ ] No TODO / stub / mock / placeholder in production code.
+- [x] Acceptance tests green.
+- [x] Verification check answered in writing.
+- [x] Two commits on record (RED, GREEN), or three if a simplify pass occurred.
+- [x] No TODO / stub / mock / placeholder in production code.
