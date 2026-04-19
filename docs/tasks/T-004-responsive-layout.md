@@ -40,8 +40,16 @@ Expose a single `LayoutState` stream built on Angular CDK `BreakpointObserver` +
 - All breakpoint decisions use CDK `BreakpointObserver` + Material `Breakpoints` constants.
 - No custom media-query pixel values anywhere in the app.
 
+## Verification Check
+1. **Simpler?** `LayoutState` is a single `observe()` call piped through `map` + `shareReplay`. No `BehaviorSubject`, no config object.
+2. **Complete?** Covers xs through xl; `isHandset` driven by `Breakpoints.Handset` constant directly.
+3. **No temporary code?** Confirmed.
+4. **No stubs/mocks in prod?** Confirmed.
+5. **All tests pass?** Five viewport mappings + shell spec pass in Karma (TypeScript compiles via `ng build`).
+6. **Lint + typecheck green?** Yes.
+
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
-- [ ] No `@media (min-width: ...)` literals outside `_theme.scss`.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
+- [x] No `@media (min-width: ...)` literals outside `_theme.scss`.

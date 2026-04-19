@@ -1,13 +1,13 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { map, shareReplay } from 'rxjs';
+import { map } from 'rxjs';
+import { LayoutState } from '../layout/layout-state';
 
 @Component({
   selector: 'app-shell',
@@ -26,9 +26,6 @@ import { map, shareReplay } from 'rxjs';
   styleUrl: './shell.component.scss',
 })
 export class ShellComponent {
-  private readonly breakpoints = inject(BreakpointObserver);
-
-  readonly isHandset$ = this.breakpoints
-    .observe(Breakpoints.Handset)
-    .pipe(map(r => r.matches), shareReplay(1));
+  private readonly layout = inject(LayoutState);
+  readonly isHandset$ = this.layout.state$.pipe(map(s => s.isHandset));
 }

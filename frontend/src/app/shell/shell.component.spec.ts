@@ -3,14 +3,15 @@
 // Description: App shell renders toolbar and sidenav; sidenav collapses on handset, pins on desktop.
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
+import { LayoutState, LayoutStateSnapshot } from '../layout/layout-state';
 import { ShellComponent } from './shell.component';
 
-function stubBreakpoint(matches: boolean): Partial<BreakpointObserver> {
-  return { observe: () => of({ matches } as BreakpointState) };
+function stubLayout(isHandset: boolean): Partial<LayoutState> {
+  const snapshot: LayoutStateSnapshot = { viewport: isHandset ? 'xs' : 'xl', isHandset };
+  return { state$: of(snapshot) };
 }
 
 describe('ShellComponent', () => {
@@ -20,7 +21,7 @@ describe('ShellComponent', () => {
       providers: [
         provideAnimationsAsync(),
         provideRouter([]),
-        { provide: BreakpointObserver, useValue: stubBreakpoint(handset) },
+        { provide: LayoutState, useValue: stubLayout(handset) },
       ],
     }).compileComponents();
     const fixture = TestBed.createComponent(ShellComponent);
