@@ -3,6 +3,7 @@ import { timingSafeEqual } from 'node:crypto';
 export interface Couple {
   id: string;
   createdAt: Date;
+  chosenCounsellorId?: string;
 }
 
 export interface CoupleInvite {
@@ -15,6 +16,8 @@ export interface CoupleInvite {
 
 export interface CoupleStore {
   createCouple(couple: Couple): Promise<void>;
+  findById(coupleId: string): Promise<Couple | null>;
+  setChosenCounsellor(coupleId: string, counsellorId: string): Promise<void>;
   saveInvite(invite: CoupleInvite): Promise<void>;
   findInviteByHash(tokenHash: string): Promise<CoupleInvite | null>;
   deleteInvite(tokenHash: string): Promise<void>;
@@ -28,6 +31,15 @@ export class InMemoryCoupleStore implements CoupleStore {
 
   async createCouple(couple: Couple): Promise<void> {
     this.couples.set(couple.id, couple);
+  }
+
+  async findById(coupleId: string): Promise<Couple | null> {
+    return this.couples.get(coupleId) ?? null;
+  }
+
+  async setChosenCounsellor(coupleId: string, counsellorId: string): Promise<void> {
+    const couple = this.couples.get(coupleId);
+    if (couple) couple.chosenCounsellorId = counsellorId;
   }
 
   async saveInvite(invite: CoupleInvite): Promise<void> {

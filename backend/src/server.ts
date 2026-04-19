@@ -15,6 +15,8 @@ import { createPostReviewHandler, createGetReviewsHandler, createDeleteReviewHan
 import { createPostCommentHandler, createGetCommentsHandler, createDeleteCommentHandler } from './counsellor/comment.ts';
 import { createAddToShortlistHandler, createRemoveFromShortlistHandler, createGetShortlistHandler } from './shortlist/shortlist.ts';
 import { InMemoryShortlistStore } from './shortlist/shortlist-store.ts';
+import { createChosenCounsellorHandler, createGetNotificationsHandler } from './couple/chosen.ts';
+import { InMemoryNotificationStore } from './auth/notification-store.ts';
 import { InMemoryRatingStore } from './counsellor/rating-store.ts';
 import { InMemoryReviewStore } from './counsellor/review-store.ts';
 import { InMemoryCommentStore } from './counsellor/comment-store.ts';
@@ -42,6 +44,7 @@ function buildMailer(): Mailer {
     sendReset: async (email, token) => { captureLog.push({ email, token }); },
     sendInvite: async (email, token) => { captureLog.push({ email, token }); },
     sendRejection: async (email, _name, reason) => { captureLog.push({ email, token: reason }); },
+    sendChosenNotification: async (email, name) => { captureLog.push({ email, token: name }); },
   };
 }
 
@@ -53,6 +56,7 @@ const ratingStore = new InMemoryRatingStore();
 const reviewStore = new InMemoryReviewStore();
 const commentStore = new InMemoryCommentStore();
 const shortlistStore = new InMemoryShortlistStore();
+const notificationStore = new InMemoryNotificationStore();
 const postalCache = new InMemoryPostalCodeCache();
 const geocodingService = new GeocodingService(postalCache, {
   geocode: async () => { throw new Error('GEOCODING_API_KEY not configured'); },
@@ -87,6 +91,8 @@ const deleteCommentHandler = createDeleteCommentHandler({ commentStore, reviewSt
 const uploadPhotoHandler = createUploadPhotoHandler({ counsellorStore });
 const servePhotoHandler = createServePhotoHandler({ counsellorStore });
 const searchCounsellorsHandler = createSearchCounsellorsHandler({ counsellorStore, geocodingService });
+const chosenCounsellorHandler = createChosenCounsellorHandler({ coupleStore, counsellorStore, notificationStore, sessionStore, userStore, mailer: authDeps.mailer });
+const getNotificationsHandler = createGetNotificationsHandler({ notificationStore, sessionStore });
 const addToShortlistHandler = createAddToShortlistHandler({ shortlistStore, sessionStore, userStore });
 const removeFromShortlistHandler = createRemoveFromShortlistHandler({ shortlistStore, sessionStore, userStore });
 const getShortlistHandler = createGetShortlistHandler({ shortlistStore, sessionStore, userStore });
@@ -149,6 +155,14 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   }
   if (req.method === 'POST' && path === '/api/couple/unlink') {
     unlinkHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path === '/api/couple/chosen') {
+    chosenCounsellorHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'GET' && path === '/api/me/notifications') {
+    getNotificationsHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/shortlist/')) {
