@@ -42,7 +42,7 @@ Automate the enforcement of L2-024 so no PR can merge that sneaks in a raw `<but
 - CI fails when typography properties are declared outside the theme file.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
-- [ ] `lint:ui` wired into CI pipeline.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
+- [x] `lint:ui` wired into CI pipeline.

@@ -3,6 +3,7 @@ const eslint = require("@eslint/js");
 const { defineConfig } = require("eslint/config");
 const tseslint = require("typescript-eslint");
 const angular = require("angular-eslint");
+const noBareHtmlElements = require("./eslint-plugins/no-bare-html-elements");
 
 module.exports = defineConfig([
   {
@@ -36,10 +37,15 @@ module.exports = defineConfig([
   },
   {
     files: ["**/*.html"],
+    plugins: {
+      local: { rules: { "no-bare-html-elements": noBareHtmlElements } },
+    },
     extends: [
       angular.configs.templateRecommended,
       angular.configs.templateAccessibility,
     ],
-    rules: {},
-  }
+    rules: {
+      "local/no-bare-html-elements": "error",
+    },
+  },
 ]);

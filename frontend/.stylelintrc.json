@@ -1,0 +1,18 @@
+{
+  "plugins": ["stylelint-declaration-strict-value"],
+  "rules": {
+    "scale-unlimited/declaration-strict-value": [
+      [
+        "color", "background-color", "border-color", "fill", "stroke",
+        "font-size", "font-weight", "font-family", "line-height"
+      ],
+      {
+        "ignoreValues": {
+          "": ["transparent", "currentColor", "inherit", "initial", "unset", "none", "normal", "0"]
+        },
+        "disableFix": true
+      }
+    ]
+  },
+  "ignoreFiles": ["**/styles/_theme.scss", "**/node_modules/**"]
+}
