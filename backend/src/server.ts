@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { createSignupHandler } from './auth/signup.ts';
 import { createVerifyHandler, createResendHandler } from './auth/verify.ts';
 import { createLoginHandler, createMeHandler } from './auth/login.ts';
+import { createLogoutHandler } from './auth/logout.ts';
 import { InMemoryUserStore } from './auth/user-store.ts';
 import { InMemorySessionStore } from './auth/session-store.ts';
 import { LoginRateLimiter } from './auth/rate-limit.ts';
@@ -32,6 +33,7 @@ const verifyHandler = createVerifyHandler(authDeps);
 const resendHandler = createResendHandler(authDeps);
 const loginHandler = createLoginHandler(sessionDeps, new LoginRateLimiter());
 const meHandler = createMeHandler(sessionDeps);
+const logoutHandler = createLogoutHandler({ sessionStore });
 
 export function handler(req: IncomingMessage, res: ServerResponse): void {
   const url = new URL(req.url ?? '', 'http://x');
@@ -60,6 +62,10 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   }
   if (req.method === 'GET' && path === '/api/auth/me') {
     meHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path === '/api/auth/logout') {
+    logoutHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (CAPTURE && req.method === 'GET' && path === '/api/dev/last-token') {
