@@ -12,8 +12,10 @@ import { createSubmitCounsellorHandler } from './counsellor/submit.ts';
 import { createListPendingHandler, createApproveHandler, createRejectHandler } from './counsellor/moderate.ts';
 import { createRateCounsellorHandler } from './counsellor/rating.ts';
 import { createPostReviewHandler, createGetReviewsHandler, createDeleteReviewHandler } from './counsellor/review.ts';
+import { createPostCommentHandler, createGetCommentsHandler, createDeleteCommentHandler } from './counsellor/comment.ts';
 import { InMemoryRatingStore } from './counsellor/rating-store.ts';
 import { InMemoryReviewStore } from './counsellor/review-store.ts';
+import { InMemoryCommentStore } from './counsellor/comment-store.ts';
 import { createUploadPhotoHandler, createServePhotoHandler } from './counsellor/photo.ts';
 import { createSearchCounsellorsHandler } from './counsellor/search.ts';
 import { GeocodingService } from './geo/geocoding.ts';
@@ -47,6 +49,7 @@ const coupleStore = new InMemoryCoupleStore();
 const counsellorStore = new InMemoryCounsellorStore();
 const ratingStore = new InMemoryRatingStore();
 const reviewStore = new InMemoryReviewStore();
+const commentStore = new InMemoryCommentStore();
 const postalCache = new InMemoryPostalCodeCache();
 const geocodingService = new GeocodingService(postalCache, {
   geocode: async () => { throw new Error('GEOCODING_API_KEY not configured'); },
@@ -75,6 +78,9 @@ const rateCounsellorHandler = createRateCounsellorHandler({ counsellorStore, rat
 const postReviewHandler = createPostReviewHandler({ counsellorStore, reviewStore, sessionStore, userStore });
 const getReviewsHandler = createGetReviewsHandler({ counsellorStore, reviewStore, sessionStore, userStore });
 const deleteReviewHandler = createDeleteReviewHandler({ counsellorStore, reviewStore, sessionStore, userStore });
+const postCommentHandler = createPostCommentHandler({ commentStore, reviewStore, sessionStore, userStore });
+const getCommentsHandler = createGetCommentsHandler({ commentStore, reviewStore, sessionStore, userStore });
+const deleteCommentHandler = createDeleteCommentHandler({ commentStore, reviewStore, sessionStore, userStore });
 const uploadPhotoHandler = createUploadPhotoHandler({ counsellorStore });
 const servePhotoHandler = createServePhotoHandler({ counsellorStore });
 const searchCounsellorsHandler = createSearchCounsellorsHandler({ counsellorStore, geocodingService });
@@ -179,9 +185,24 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     getReviewsHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
-  if (req.method === 'DELETE' && path.startsWith('/api/reviews/')) {
+  if (req.method === 'DELETE' && path.startsWith('/api/reviews/') && !path.includes('/comments')) {
     const id = path.slice('/api/reviews/'.length);
     deleteReviewHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path.startsWith('/api/reviews/') && path.endsWith('/comments')) {
+    const id = path.slice('/api/reviews/'.length, -'/comments'.length);
+    postCommentHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'GET' && path.startsWith('/api/reviews/') && path.endsWith('/comments')) {
+    const id = path.slice('/api/reviews/'.length, -'/comments'.length);
+    getCommentsHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'DELETE' && path.startsWith('/api/comments/')) {
+    const id = path.slice('/api/comments/'.length);
+    deleteCommentHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (req.method === 'GET' && path.startsWith('/api/counsellors/')) {
