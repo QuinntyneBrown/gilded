@@ -40,6 +40,6 @@ Ship `POST /api/counsellors` for authenticated users. Creates a record with `sou
 2. Given a submission matches an existing counsellor, when submitted, then the system surfaces the existing record and blocks duplicate creation.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
