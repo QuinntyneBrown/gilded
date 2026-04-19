@@ -13,8 +13,8 @@
 }
 
 .login-title {
-  font-size: 1.5rem;
-  font-weight: 500;
+  font-size: var(--gilded-title-font-size);
+  font-weight: var(--gilded-title-font-weight);
   margin: 0 0 24px;
 }
 
@@ -30,5 +30,5 @@
 .login-error {
   color: var(--mat-sys-error);
   margin: 8px 0;
-  font-size: 0.875rem;
+  font-size: var(--gilded-helper-font-size);
 }

@@ -13,8 +13,8 @@ gilded/
 │   ├── tasks/                # T-### task breakdowns
 │   ├── adr/                  # Architecture Decision Records
 │   └── folder-structure.md   # This document
-├── frontend/                 # Angular application (see "Frontend" below)
-├── backend/                  # Backend API (see "Backend" below)
+├── frontend/                 # Angular workspace package (see "Frontend" below)
+├── backend/                  # Backend workspace package (see "Backend" below)
 ├── e2e/                      # Playwright end-to-end tests (see "E2E" below)
 ├── public/                   # Static assets served by the frontend
 ├── scripts/                  # Dev/build/deploy helper scripts
@@ -32,10 +32,10 @@ Angular application. All Angular-specific config (`angular.json`, `tsconfig*.jso
 
 ```
 frontend/
+├── package.json              # Frontend workspace manifest (Angular deps + scripts)
 ├── angular.json              # Angular workspace config
 ├── tsconfig.json             # Base TS config for the Angular app
 ├── tsconfig.app.json
-├── tsconfig.spec.json
 ├── public/                   # Static assets copied into the build
 └── src/
     ├── app/
@@ -80,6 +80,7 @@ Backend API. Layered structure separating HTTP transport, application logic, dom
 
 ```
 backend/
+├── package.json              # Backend workspace manifest (runtime deps + scripts)
 └── src/
     ├── api/                  # HTTP layer: controllers/routes, DTOs, validators
     │   ├── auth/

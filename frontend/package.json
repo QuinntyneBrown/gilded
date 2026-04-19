@@ -1,0 +1,38 @@
+{
+  "name": "gilded-frontend",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "ng serve",
+    "build": "ng build",
+    "lint": "ng lint",
+    "lint:ui": "npm run lint && stylelint \"src/**/*.scss\" --config .stylelintrc.json",
+    "typecheck": "ng build"
+  },
+  "dependencies": {
+    "@angular/animations": "^20.3.19",
+    "@angular/cdk": "^20.2.14",
+    "@angular/common": "^20.3.0",
+    "@angular/compiler": "^20.3.0",
+    "@angular/core": "^20.3.0",
+    "@angular/forms": "^20.3.0",
+    "@angular/material": "^20.2.14",
+    "@angular/platform-browser": "^20.3.0",
+    "@angular/router": "^20.3.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^20.3.20",
+    "@angular/cli": "^20.3.20",
+    "@angular/compiler-cli": "^20.3.0",
+    "@eslint/js": "^9.39.4",
+    "angular-eslint": "21.0.1",
+    "eslint": "^9.39.1",
+    "stylelint": "^17.8.0",
+    "stylelint-declaration-strict-value": "^1.11.1",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "8.46.4"
+  }
+}

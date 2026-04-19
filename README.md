@@ -13,7 +13,7 @@ Gilded is an open source web application for Christian couples to discover couns
 - Angular 20 frontend with standalone components and Angular Material-only UI enforcement
 - TypeScript backend with explicit HTTP handlers for auth and couple workflows
 - Node test runner plus Playwright end-to-end coverage
-- CI pipeline for typechecking, linting, UI lint rules, unit tests, and browser tests
+- CI pipeline for typechecking, linting, backend tests, UI lint rules, and browser tests
 - Requirements, acceptance criteria, and delivery plan tracked in the repository
 
 ## Current Scope
@@ -43,11 +43,11 @@ Current limitations:
 ## Repository Layout
 
 ```text
-backend/              TypeScript HTTP service and domain logic
+backend/              TypeScript HTTP service, domain logic, and its workspace manifest
 docs/specs/           L1 and L2 product requirements
 docs/tasks/           Vertically sliced implementation plan
 e2e/                  Playwright page objects and end-to-end specs
-frontend/             Angular 20 application
+frontend/             Angular 20 application and its workspace manifest
 tests/                Lint enforcement tests and fixtures
 ```
 
@@ -63,6 +63,8 @@ tests/                Lint enforcement tests and fixtures
 ```bash
 npm ci
 ```
+
+The root `package.json` orchestrates the workspaces and shared tooling. App-specific dependencies now live in `frontend/package.json` and `backend/package.json`.
 
 ### Run locally
 

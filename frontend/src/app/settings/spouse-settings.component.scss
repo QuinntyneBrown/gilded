@@ -19,5 +19,5 @@ mat-card {
 .spouse-error {
   color: var(--mat-sys-error);
   margin: 8px 0;
-  font-size: 0.875rem;
+  font-size: var(--gilded-helper-font-size);
 }

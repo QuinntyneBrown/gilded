@@ -1,1 +1,8 @@
 @use 'styles/theme';
+
+:root {
+  --gilded-title-font-size: 1.5rem;
+  --gilded-title-font-weight: 500;
+  --gilded-helper-font-size: 0.875rem;
+  --gilded-status-icon-size: 48px;
+}
