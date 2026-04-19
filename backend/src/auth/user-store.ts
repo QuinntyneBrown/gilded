@@ -8,6 +8,8 @@ export interface User {
   passwordHash: string;
   state: UserState;
   createdAt: Date;
+  spouseId?: string;
+  coupleId?: string;
 }
 
 export interface VerificationToken {
@@ -30,6 +32,7 @@ export interface UserStore {
   findResetTokenByHash(tokenHash: string): Promise<VerificationToken | null>;
   deleteResetToken(tokenHash: string): Promise<void>;
   deleteResetTokensByUserId(userId: string): Promise<void>;
+  updateCouple(userId: string, coupleId: string, spouseId: string): Promise<void>;
 }
 
 export class InMemoryUserStore implements UserStore {
@@ -99,5 +102,10 @@ export class InMemoryUserStore implements UserStore {
 
   async deleteResetTokensByUserId(userId: string): Promise<void> {
     this.resetTokens = this.resetTokens.filter((t) => t.userId !== userId);
+  }
+
+  async updateCouple(userId: string, coupleId: string, spouseId: string): Promise<void> {
+    const user = this.byId.get(userId);
+    if (user) { user.coupleId = coupleId; user.spouseId = spouseId; }
   }
 }

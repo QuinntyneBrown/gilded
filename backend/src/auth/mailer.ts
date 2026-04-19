@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 export interface Mailer {
   sendVerification(email: string, token: string): Promise<void>;
   sendReset(email: string, token: string): Promise<void>;
+  sendInvite(email: string, token: string, inviterEmail: string): Promise<void>;
 }
 
 export class NodemailerMailer implements Mailer {
@@ -31,6 +32,17 @@ export class NodemailerMailer implements Mailer {
       to: email,
       subject: 'Reset your Gilded password',
       text: `Reset your Gilded password:\n${link}\n\nExpires in 1 hour.`,
+    });
+  }
+
+  async sendInvite(email: string, token: string, inviterEmail: string): Promise<void> {
+    const base = process.env['APP_URL'] ?? 'http://localhost:4200';
+    const link = `${base}/couple/accept?token=${token}`;
+    await this.transport.sendMail({
+      from: process.env['SMTP_FROM'] ?? 'noreply@gilded.app',
+      to: email,
+      subject: `${inviterEmail} invited you to Gilded`,
+      text: `You have been invited to join Gilded by ${inviterEmail}.\n\nAccept: ${link}\n\nExpires in 7 days.`,
     });
   }
 }
