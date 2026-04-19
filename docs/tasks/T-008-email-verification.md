@@ -41,6 +41,6 @@ Ship `GET /api/auth/verify?token=...`. On valid token, mark the user `active`. O
 3. Given a token is reused, when submitted again, then the system rejects it.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

@@ -44,6 +44,6 @@ Ship `/shortlist`: side-by-side comparison of shortlisted counsellors across rat
 1. Given a couple has 2+ shortlisted counsellors, when the user opens the comparison view, then a side-by-side grid displays rating, distance, denomination, specialties, and price/insurance.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

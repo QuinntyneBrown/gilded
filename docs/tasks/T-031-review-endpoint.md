@@ -40,6 +40,6 @@ Ship `POST /api/counsellors/:id/reviews` and `DELETE /api/reviews/:id`. Review b
 3. Given a moderator removes the review, when removed, then it is replaced with "[removed by moderator]".
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

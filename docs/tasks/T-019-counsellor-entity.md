@@ -42,6 +42,6 @@ Define the `Counsellor` entity and expose `GET /api/counsellors/:id`. The profil
 3. Given a counsellor with no reviews, when displayed, then the rating area shows "No reviews yet" rather than 0 stars.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

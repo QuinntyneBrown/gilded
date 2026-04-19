@@ -43,6 +43,6 @@ Define the `Note` entity and the at-rest encryption path used by private and spo
 3. Given a public note is written, when persisted, then the body is readable without a key.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

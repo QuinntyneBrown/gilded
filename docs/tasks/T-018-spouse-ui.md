@@ -49,6 +49,6 @@ Ship `/settings/spouse`: see current spouse (if linked), invite by email, accept
 - All components are Material; confirmation uses `MatDialog`.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

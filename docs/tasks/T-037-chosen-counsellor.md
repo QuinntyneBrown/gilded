@@ -37,6 +37,6 @@ Ship `POST /api/couple/chosen` (body `{ counsellorId }`). Sets the couple's `cho
 1. Given a user in a couple marks a counsellor as Chosen, when set, then the couple's `chosenCounsellorId` is updated and the other spouse is notified.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

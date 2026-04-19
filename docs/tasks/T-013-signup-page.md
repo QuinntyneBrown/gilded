@@ -52,7 +52,7 @@ Ship `/signup` in Angular using only Material components. On submit, call `POST 
 - Submitting a valid email + password renders the generic confirmation.
 
 ## Done When
-- [ ] Acceptance tests green on all three browsers.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
-- [ ] POM exposes only domain-level methods.
+- [x] Acceptance tests green on all three browsers.
+- [x] Verification check answered.
+- [x] Two commits recorded.
+- [x] POM exposes only domain-level methods.

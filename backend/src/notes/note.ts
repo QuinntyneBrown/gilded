@@ -19,6 +19,7 @@ export interface NoteStore {
   findById(id: string): Promise<Note | null>;
   findByAuthor(authorId: string): Promise<Note[]>;
   findByCouple(coupleId: string): Promise<Note[]>;
+  findPublic(offset: number, limit: number): Promise<Note[]>;
   update(id: string, patch: Partial<Pick<Note, 'ciphertext' | 'iv' | 'body' | 'updatedAt'>>): Promise<void>;
   softDelete(id: string): Promise<void>;
   hardDelete(id: string): Promise<void>;
@@ -45,6 +46,13 @@ export class InMemoryNoteStore implements NoteStore {
     return [...this.byId.values()]
       .filter(n => n.coupleId === coupleId && !n.deletedAt)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async findPublic(offset: number, limit: number): Promise<Note[]> {
+    return [...this.byId.values()]
+      .filter(n => n.visibility === 'public' && !n.deletedAt)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(offset, offset + limit);
   }
 
   async update(id: string, patch: Partial<Pick<Note, 'ciphertext' | 'iv' | 'body' | 'updatedAt'>>): Promise<void> {

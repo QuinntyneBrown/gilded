@@ -46,6 +46,6 @@ Ship `POST /api/couple/invite` and `POST /api/couple/accept`. An authenticated u
 3. Given a user already in a couple, when they attempt to send or accept another invitation, then the system rejects it with a clear error.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

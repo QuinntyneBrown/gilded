@@ -21,6 +21,7 @@ import { createCreateIntentHandler, createGetCurrentIntentHandler, createUpdateI
 import { InMemoryAppointmentStore } from './appointment/appointment-store.ts';
 import { createCreatePrivateNoteHandler, createListPrivateNotesHandler, createUpdatePrivateNoteHandler, createDeletePrivateNoteHandler } from './notes/private-notes.ts';
 import { createCreateSpouseNoteHandler, createListSpouseNotesHandler, createUpdateSpouseNoteHandler, createDeleteSpouseNoteHandler } from './notes/spouse-notes.ts';
+import { createCreatePublicNoteHandler, createGetPublicFeedHandler, createUpdatePublicNoteHandler, createDeletePublicNoteHandler } from './notes/public-notes.ts';
 import { InMemoryNoteStore } from './notes/note.ts';
 import { InMemoryRatingStore } from './counsellor/rating-store.ts';
 import { InMemoryReviewStore } from './counsellor/review-store.ts';
@@ -102,6 +103,10 @@ const createPrivateNoteHandler = createCreatePrivateNoteHandler({ noteStore, ses
 const listPrivateNotesHandler = createListPrivateNotesHandler({ noteStore, sessionStore });
 const updatePrivateNoteHandler = createUpdatePrivateNoteHandler({ noteStore, sessionStore });
 const deletePrivateNoteHandler = createDeletePrivateNoteHandler({ noteStore, sessionStore });
+const createPublicNoteHandler = createCreatePublicNoteHandler({ noteStore, sessionStore, userStore });
+const getPublicFeedHandler = createGetPublicFeedHandler({ noteStore, sessionStore });
+const updatePublicNoteHandler = createUpdatePublicNoteHandler({ noteStore, sessionStore, userStore });
+const deletePublicNoteHandler = createDeletePublicNoteHandler({ noteStore, sessionStore });
 const createSpouseNoteHandler = createCreateSpouseNoteHandler({ noteStore, sessionStore, userStore });
 const listSpouseNotesHandler = createListSpouseNotesHandler({ noteStore, sessionStore, userStore });
 const updateSpouseNoteHandler = createUpdateSpouseNoteHandler({ noteStore, sessionStore });

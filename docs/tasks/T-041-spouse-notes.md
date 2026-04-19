@@ -41,6 +41,6 @@ Ship endpoints for `visibility='spouse'`. Only the author and their linked spous
 3. Given a couple is dissolved, when a former spouse queries spouse notes, then none authored by the other are returned.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

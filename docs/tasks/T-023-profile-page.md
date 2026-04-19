@@ -51,6 +51,6 @@ Ship `/counsellors/:id`: full profile card, photo (or placeholder), rating, deno
 - Zero-review state shows "No reviews yet".
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

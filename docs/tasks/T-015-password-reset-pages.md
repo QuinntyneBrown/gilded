@@ -45,6 +45,6 @@ Ship two Angular routes: `/reset-request` (enter email) and `/reset-complete?tok
 - Complete consumes the token single-use; reuse shows error.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

@@ -35,6 +35,6 @@
 1. Given a logged-in user, when they click logout, then the session is invalidated server-side and the cookie is cleared.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

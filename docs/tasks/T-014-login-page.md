@@ -50,6 +50,6 @@ Ship `/login` using only Material components. On success, redirect to `/search` 
 - Rate-limited response shows a message sourced from the 429 body.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

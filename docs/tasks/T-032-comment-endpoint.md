@@ -38,6 +38,6 @@ Ship `POST /api/reviews/:reviewId/comments` and `DELETE /api/comments/:id`. 1-10
 3. Given a moderator removes it, when removed, then it renders "[removed by moderator]".
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

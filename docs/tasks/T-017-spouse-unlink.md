@@ -38,7 +38,7 @@ Ship `POST /api/couple/unlink`. Either spouse can dissolve the couple. After unl
 1. Given a user in a couple, when they choose unlink, then the couple is dissolved, spouse-shared notes become private to their original authors, and both users may form new couples.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
-- [ ] `CoupleDissolved` event emitted and captured by at least one integration test.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
+- [x] `CoupleDissolved` event emitted and captured by at least one integration test.

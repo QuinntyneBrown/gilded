@@ -40,6 +40,6 @@ Ship `POST /api/auth/reset-request` and `POST /api/auth/reset-complete`. The req
 3. Given an expired or reused token, when submitted, then the system rejects it.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

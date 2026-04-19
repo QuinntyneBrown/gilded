@@ -42,6 +42,6 @@ Ship `GET /api/counsellors?postal=L5A4E6&radiusKm=25&page=1`. Orders by ascendin
 2. Given a search that returns more than 20 results, when rendered, then results are paginated at 20 per page.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

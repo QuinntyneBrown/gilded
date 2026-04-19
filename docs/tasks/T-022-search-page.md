@@ -50,6 +50,6 @@ Ship `/search`: postal code input, radius chooser, results list with distance, r
 - Pagination uses `MatPaginator` at 20 per page.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

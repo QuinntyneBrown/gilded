@@ -38,6 +38,6 @@ Ship endpoints for a couple's shared shortlist: `POST /api/shortlist/:counsellor
 1. Given a user clicks Shortlist on a counsellor, when stored, then the counsellor is added to the owner's shortlist (couple or self).
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

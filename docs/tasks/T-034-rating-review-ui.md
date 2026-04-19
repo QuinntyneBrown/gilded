@@ -48,6 +48,6 @@ Extend the counsellor profile page to host rating, review list with create form,
 - Responsive at all five breakpoints.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

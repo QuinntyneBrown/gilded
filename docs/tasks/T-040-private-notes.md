@@ -40,6 +40,6 @@ Ship `POST / GET / PUT / DELETE /api/notes` scoped to `visibility='private'`. On
 2. Given any non-author queries any notes endpoint by id, when executed, then private notes are never returned.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

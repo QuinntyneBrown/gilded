@@ -39,6 +39,6 @@ Ship `POST /api/appointment-intent` recording `(coupleId, counsellorId, at)`. On
 3. Given an appointment intent exists, when the couple revisits, then a banner reminds them and prompts Booked/Cancelled.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

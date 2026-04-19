@@ -41,6 +41,6 @@ Reject login attempts with HTTP 429 after 5 failures within 15 minutes, keyed by
 2. Given the 15-minute window elapses, when a new attempt is made, then it is allowed.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

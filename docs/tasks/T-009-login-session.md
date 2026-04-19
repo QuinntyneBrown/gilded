@@ -43,7 +43,7 @@ Ship `POST /api/auth/login`. On success, issue a signed session cookie (`HttpOnl
 2. Given invalid credentials, when the user attempts login, then the system returns a generic error and increments a rate-limit counter (the counter is implemented in T-010).
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
-- [ ] Cookie attributes verified by an automated test.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
+- [x] Cookie attributes verified by an automated test.

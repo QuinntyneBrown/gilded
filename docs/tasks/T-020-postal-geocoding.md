@@ -43,7 +43,7 @@ Ship a `GeocodingService` that returns `{ lat, lng }` for a Canadian or US posta
 3. Given a search, when it executes, then p95 response time must be <= 1000 ms for cached postal codes and <= 2500 ms for uncached.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
-- [ ] Upstream API key never logged.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
+- [x] Upstream API key never logged.
