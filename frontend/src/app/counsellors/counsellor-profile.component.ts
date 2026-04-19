@@ -7,6 +7,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CounsellorAvatarComponent } from './counsellor-avatar.component';
 
 interface CounsellorProfile {
   id: string;
@@ -36,6 +37,7 @@ interface CounsellorProfile {
     MatDividerModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    CounsellorAvatarComponent,
   ],
   templateUrl: './counsellor-profile.component.html',
   styleUrl: './counsellor-profile.component.scss',
