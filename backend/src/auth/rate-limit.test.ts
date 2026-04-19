@@ -1,41 +1,39 @@
 // Acceptance Test
-// Traces to: T-010
-// Description: LoginRateLimiter blocks after 5 failures in 15 min; window rolls off correctly.
+// Traces to: T-045
+// Description: SlidingWindowLimiter blocks after limit hits; window rolls off; keys are independent.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { LoginRateLimiter } from './rate-limit.ts';
+import { SlidingWindowLimiter } from './global-rate-limiter.ts';
 
-test('allows first 5 failures then blocks on 6th', () => {
-  const limiter = new LoginRateLimiter();
+test('allows first N requests then blocks', () => {
+  const limiter = new SlidingWindowLimiter(3, 60_000);
   const t0 = Date.now();
 
-  for (let i = 0; i < 5; i++) {
-    assert.equal(limiter.check('key', t0 + i).limited, false);
-    limiter.record('key', t0 + i);
-  }
-
-  const { limited, retryAfterSecs } = limiter.check('key', t0 + 5);
+  assert.equal(limiter.checkAndRecord('key', t0).limited, false);
+  assert.equal(limiter.checkAndRecord('key', t0 + 1).limited, false);
+  assert.equal(limiter.checkAndRecord('key', t0 + 2).limited, false);
+  const { limited, retryAfterSecs } = limiter.checkAndRecord('key', t0 + 3);
   assert.equal(limited, true);
   assert.ok(retryAfterSecs > 0);
 });
 
-test('window rolls off after 15 minutes', () => {
-  const limiter = new LoginRateLimiter();
+test('window rolls off after windowMs', () => {
+  const limiter = new SlidingWindowLimiter(3, 60_000);
   const t0 = Date.now();
 
-  for (let i = 0; i < 5; i++) limiter.record('key', t0 + i);
-  assert.equal(limiter.check('key', t0 + 5).limited, true);
+  for (let i = 0; i < 3; i++) limiter.checkAndRecord('key', t0 + i);
+  assert.equal(limiter.checkAndRecord('key', t0 + 3).limited, true);
 
-  const after15 = t0 + 15 * 60 * 1000 + 1;
-  assert.equal(limiter.check('key', after15).limited, false);
+  const afterWindow = t0 + 60_001;
+  assert.equal(limiter.checkAndRecord('key', afterWindow).limited, false);
 });
 
 test('different keys are independent', () => {
-  const limiter = new LoginRateLimiter();
+  const limiter = new SlidingWindowLimiter(3, 60_000);
   const t0 = Date.now();
 
-  for (let i = 0; i < 5; i++) limiter.record('key-a', t0 + i);
-  assert.equal(limiter.check('key-a', t0 + 5).limited, true);
-  assert.equal(limiter.check('key-b', t0 + 5).limited, false);
+  for (let i = 0; i < 3; i++) limiter.checkAndRecord('key-a', t0 + i);
+  assert.equal(limiter.checkAndRecord('key-a', t0 + 3).limited, true);
+  assert.equal(limiter.checkAndRecord('key-b', t0 + 3).limited, false);
 });

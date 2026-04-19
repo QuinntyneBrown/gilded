@@ -35,7 +35,7 @@ import { InMemorySessionStore } from './auth/session-store.ts';
 import { InMemoryCoupleStore } from './couple/couple-store.ts';
 import { InMemoryCounsellorStore } from './counsellor/counsellor-store.ts';
 import { EventBus } from './events.ts';
-import { LoginRateLimiter } from './auth/rate-limit.ts';
+import { SlidingWindowLimiter, ipKey } from './auth/global-rate-limiter.ts';
 import { NodemailerMailer } from './auth/mailer.ts';
 import type { Mailer } from './auth/mailer.ts';
 
@@ -76,7 +76,8 @@ const sessionDeps = { userStore, sessionStore };
 const signupHandler = createSignupHandler(authDeps);
 const verifyHandler = createVerifyHandler(authDeps);
 const resendHandler = createResendHandler(authDeps);
-const loginHandler = createLoginHandler(sessionDeps, new LoginRateLimiter());
+const globalRateLimiter = new SlidingWindowLimiter(10, 60_000);
+const loginHandler = createLoginHandler(sessionDeps);
 const meHandler = createMeHandler(sessionDeps);
 const logoutHandler = createLogoutHandler({ sessionStore });
 const resetRequestHandler = createResetRequestHandler({ userStore, mailer: authDeps.mailer });
@@ -128,6 +129,16 @@ eventBus.on('CoupleCreated', (event) => {
   ]).catch(console.error);
 });
 
+function rejectRateLimit(req: IncomingMessage, res: ServerResponse): boolean {
+  const { limited, retryAfterSecs } = globalRateLimiter.checkAndRecord(ipKey(req));
+  if (limited) {
+    res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSecs) });
+    res.end(JSON.stringify({ error: 'Too many requests. Try again later.' }));
+    return true;
+  }
+  return false;
+}
+
 export function handler(req: IncomingMessage, res: ServerResponse): void {
   const url = new URL(req.url ?? '', 'http://x');
   const path = url.pathname;
@@ -138,6 +149,7 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     return;
   }
   if (req.method === 'POST' && path === '/api/auth/signup') {
+    if (rejectRateLimit(req, res)) return;
     signupHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
@@ -150,6 +162,7 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     return;
   }
   if (req.method === 'POST' && path === '/api/auth/login') {
+    if (rejectRateLimit(req, res)) return;
     loginHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
@@ -162,6 +175,7 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     return;
   }
   if (req.method === 'POST' && path === '/api/auth/reset-request') {
+    if (rejectRateLimit(req, res)) return;
     resetRequestHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
@@ -170,6 +184,7 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     return;
   }
   if (req.method === 'POST' && path === '/api/couple/invite') {
+    if (rejectRateLimit(req, res)) return;
     inviteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }

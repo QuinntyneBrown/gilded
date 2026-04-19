@@ -3,8 +3,6 @@ import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { UserStore } from './user-store.ts';
 import type { SessionStore } from './session-store.ts';
-import { LoginRateLimiter, makeRateLimitKey } from './rate-limit.ts';
-
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 export interface LoginDeps {
@@ -69,7 +67,7 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
   });
 }
 
-export function createLoginHandler(deps: LoginDeps, rateLimiter: LoginRateLimiter) {
+export function createLoginHandler(deps: LoginDeps) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     let body: unknown;
     try { body = await readJson(req); } catch { body = {}; }
@@ -81,18 +79,9 @@ export function createLoginHandler(deps: LoginDeps, rateLimiter: LoginRateLimite
       return;
     }
 
-    const rlKey = makeRateLimitKey(email, req);
-    const { limited, retryAfterSecs } = rateLimiter.check(rlKey);
-    if (limited) {
-      res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSecs) });
-      res.end(JSON.stringify({ error: 'Too many failed attempts. Try again later.' }));
-      return;
-    }
-
     const result = await loginUser(email, password, deps);
 
     if (result.outcome !== 'ok') {
-      rateLimiter.record(rlKey);
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'invalid credentials or unverified account' }));
       return;
