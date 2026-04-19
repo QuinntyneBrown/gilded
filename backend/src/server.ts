@@ -10,6 +10,8 @@ import { createUnlinkHandler } from './couple/unlink.ts';
 import { createGetCounsellorHandler } from './counsellor/counsellor.ts';
 import { createSubmitCounsellorHandler } from './counsellor/submit.ts';
 import { createListPendingHandler, createApproveHandler, createRejectHandler } from './counsellor/moderate.ts';
+import { createRateCounsellorHandler } from './counsellor/rating.ts';
+import { InMemoryRatingStore } from './counsellor/rating-store.ts';
 import { createUploadPhotoHandler, createServePhotoHandler } from './counsellor/photo.ts';
 import { createSearchCounsellorsHandler } from './counsellor/search.ts';
 import { GeocodingService } from './geo/geocoding.ts';
@@ -41,6 +43,7 @@ const userStore = new InMemoryUserStore();
 const sessionStore = new InMemorySessionStore();
 const coupleStore = new InMemoryCoupleStore();
 const counsellorStore = new InMemoryCounsellorStore();
+const ratingStore = new InMemoryRatingStore();
 const postalCache = new InMemoryPostalCodeCache();
 const geocodingService = new GeocodingService(postalCache, {
   geocode: async () => { throw new Error('GEOCODING_API_KEY not configured'); },
@@ -65,6 +68,7 @@ const submitCounsellorHandler = createSubmitCounsellorHandler({ counsellorStore,
 const listPendingHandler = createListPendingHandler({ counsellorStore, sessionStore, userStore, mailer: authDeps.mailer });
 const approveHandler = createApproveHandler({ counsellorStore, sessionStore, userStore, mailer: authDeps.mailer });
 const rejectHandler = createRejectHandler({ counsellorStore, sessionStore, userStore, mailer: authDeps.mailer });
+const rateCounsellorHandler = createRateCounsellorHandler({ counsellorStore, ratingStore, sessionStore });
 const uploadPhotoHandler = createUploadPhotoHandler({ counsellorStore });
 const servePhotoHandler = createServePhotoHandler({ counsellorStore });
 const searchCounsellorsHandler = createSearchCounsellorsHandler({ counsellorStore, geocodingService });
@@ -134,6 +138,11 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   if (req.method === 'POST' && path.startsWith('/api/admin/counsellors/') && path.endsWith('/reject')) {
     const id = path.slice('/api/admin/counsellors/'.length, -'/reject'.length);
     rejectHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'PUT' && path.startsWith('/api/counsellors/') && path.endsWith('/rating')) {
+    const id = path.slice('/api/counsellors/'.length, -'/rating'.length);
+    rateCounsellorHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/counsellors/') && path.endsWith('/photo')) {

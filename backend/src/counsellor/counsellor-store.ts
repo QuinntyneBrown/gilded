@@ -34,6 +34,7 @@ export interface CounsellorStore {
   findDuplicate(normalizedName: string, normalizedAddress: string, phone: string, email: string): Promise<Counsellor | null>;
   findAll(): Promise<Counsellor[]>;
   findPending(): Promise<Counsellor[]>;
+  updateRatingAggregate(id: string, rating: number, reviewCount: number): Promise<void>;
   updateModerationState(id: string, state: 'approved' | 'rejected', reviewedBy?: string): Promise<void>;
   updatePhoto(id: string, filename: string): Promise<void>;
 }
@@ -76,6 +77,11 @@ export class InMemoryCounsellorStore implements CounsellorStore {
   async updateModerationState(id: string, state: 'approved' | 'rejected', reviewedBy?: string): Promise<void> {
     const c = this.byId.get(id);
     if (c) { c.moderationState = state; if (reviewedBy) c.reviewedBy = reviewedBy; }
+  }
+
+  async updateRatingAggregate(id: string, rating: number, reviewCount: number): Promise<void> {
+    const c = this.byId.get(id);
+    if (c) { c.rating = rating; c.reviewCount = reviewCount; }
   }
 
   async updatePhoto(id: string, filename: string): Promise<void> {
