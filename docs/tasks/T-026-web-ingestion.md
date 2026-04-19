@@ -43,6 +43,6 @@ Ship a scheduled job (`npm run ingest:counsellors` and a CRON hook) that pulls a
 4. Given the ingestion job, when it runs, then it must not expose third-party API keys in logs or error messages.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
