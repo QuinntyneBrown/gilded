@@ -11,8 +11,8 @@ import type { User } from './user-store.ts';
 import type { Mailer } from './mailer.ts';
 import { signupUser } from './signup.ts';
 
-function fakeMailer(): { mailer: Mailer; sent: Array<{ email: string; token: string }> } {
-  const sent: Array<{ email: string; token: string }> = [];
+function fakeMailer(): { mailer: Mailer; sent: { email: string; token: string }[] } {
+  const sent: { email: string; token: string }[] = [];
   return {
     sent,
     mailer: { sendVerification: (email, token) => { sent.push({ email, token }); return Promise.resolve(); } },
