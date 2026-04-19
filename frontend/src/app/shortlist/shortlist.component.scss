@@ -1,0 +1,67 @@
+.shortlist-wrapper {
+  padding: 24px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0 0 24px;
+}
+
+.page-spinner {
+  display: block;
+  margin: 48px auto;
+}
+
+.no-shortlist {
+  color: var(--mat-sys-on-surface-variant);
+  font-style: italic;
+}
+
+.comparison-table {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.star-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+  vertical-align: middle;
+  color: var(--mat-sys-primary);
+}
+
+.no-rating {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.counsellor-card {
+  width: 100%;
+}
+
+.card-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+button {
+  min-height: 44px;
+}

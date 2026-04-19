@@ -1,0 +1,125 @@
+<div class="shortlist-wrapper">
+  <h1 class="page-title">Your Shortlist</h1>
+
+  @if (loading()) {
+    <mat-progress-spinner mode="indeterminate" class="page-spinner" />
+  }
+
+  @if (!loading() && counsellors().length === 0) {
+    <p class="no-shortlist">No counsellors shortlisted yet. <a routerLink="/search">Search for counsellors</a> to get started.</p>
+  }
+
+  @if (!loading() && counsellors().length > 0) {
+    @if (isDesktop()) {
+      <table mat-table [dataSource]="counsellors()" class="comparison-table">
+
+        <ng-container matColumnDef="avatar">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let c" [attr.data-shortlist-item]="c.id">
+            @if (c.photoUrl) {
+              <img [src]="c.photoUrl" [alt]="c.name" class="table-avatar" />
+            } @else {
+              <app-counsellor-avatar [name]="c.name" [size]="40" />
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let c">
+            <a [routerLink]="['/counsellors', c.id]" data-counsellor-name>{{ c.name }}</a>
+            @if (c.chosen) { <mat-icon data-chosen color="primary">check_circle</mat-icon> }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="denomination">
+          <th mat-header-cell *matHeaderCellDef>Denomination</th>
+          <td mat-cell *matCellDef="let c">{{ c.denomination }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="specialties">
+          <th mat-header-cell *matHeaderCellDef>Specialties</th>
+          <td mat-cell *matCellDef="let c">
+            <mat-chip-set>
+              @for (s of c.specialties.slice(0, 3); track s) {
+                <mat-chip>{{ s }}</mat-chip>
+              }
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="rating">
+          <th mat-header-cell *matHeaderCellDef>Rating</th>
+          <td mat-cell *matCellDef="let c">
+            @if (c.rating !== null) {
+              <span>
+                <mat-icon class="star-icon" aria-hidden="true">star</mat-icon>
+                {{ c.rating }}
+              </span>
+            } @else {
+              <span class="no-rating">—</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let c">
+            <button mat-button color="primary" (click)="choose(c.id)">
+              <mat-icon>{{ c.chosen ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+              Choose
+            </button>
+            <button mat-button color="warn" (click)="remove(c.id)">
+              <mat-icon>delete</mat-icon>
+              Remove
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [attr.data-shortlist-item]="row.id"></tr>
+      </table>
+    } @else {
+      <div class="card-list">
+        @for (c of counsellors(); track c.id) {
+          <mat-card class="counsellor-card" [attr.data-shortlist-item]="c.id">
+            <mat-card-header>
+              <div mat-card-avatar>
+                @if (c.photoUrl) {
+                  <img [src]="c.photoUrl" [alt]="c.name" class="card-avatar" />
+                } @else {
+                  <app-counsellor-avatar [name]="c.name" [size]="40" />
+                }
+              </div>
+              <mat-card-title>
+                <a [routerLink]="['/counsellors', c.id]" data-counsellor-name>{{ c.name }}</a>
+                @if (c.chosen) { <mat-icon data-chosen color="primary">check_circle</mat-icon> }
+              </mat-card-title>
+              <mat-card-subtitle>{{ c.denomination }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              @if (c.rating !== null) {
+                <p><mat-icon class="star-icon" aria-hidden="true">star</mat-icon> {{ c.rating }} ({{ c.reviewCount }})</p>
+              }
+              <mat-chip-set>
+                @for (s of c.specialties.slice(0, 3); track s) {
+                  <mat-chip>{{ s }}</mat-chip>
+                }
+              </mat-chip-set>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-button color="primary" (click)="choose(c.id)">
+                <mat-icon>{{ c.chosen ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                Choose
+              </button>
+              <button mat-button color="warn" (click)="remove(c.id)">
+                <mat-icon>delete</mat-icon>
+                Remove
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</div>

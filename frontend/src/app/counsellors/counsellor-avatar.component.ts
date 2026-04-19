@@ -8,8 +8,8 @@ const PALETTE = ['#1565C0', '#2E7D32', '#6A1B9A', '#AD1457', '#00695C', '#E65100
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="avatar" [style.background-color]="bgColor()">
-      <span class="initials">{{ initials() }}</span>
+    <div class="avatar" [style.background-color]="bgColor()" [style.width.px]="size()" [style.height.px]="size()">
+      <span class="initials" [style.font-size.px]="size() * 0.35">{{ initials() }}</span>
     </div>
   `,
   styles: [`
@@ -17,8 +17,6 @@ const PALETTE = ['#1565C0', '#2E7D32', '#6A1B9A', '#AD1457', '#00695C', '#E65100
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 80px;
-      height: 80px;
       border-radius: 50%;
     }
     .initials {
@@ -32,6 +30,7 @@ const PALETTE = ['#1565C0', '#2E7D32', '#6A1B9A', '#AD1457', '#00695C', '#E65100
 })
 export class CounsellorAvatarComponent {
   name = input<string>('');
+  size = input<number>(80);
 
   initials = computed(() => {
     const parts = this.name().trim().split(/\s+/).filter(Boolean);

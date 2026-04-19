@@ -26,6 +26,10 @@ export const routes: Routes = [
     loadComponent: () => import('./settings/spouse-settings.component').then(m => m.SpouseSettingsPageComponent),
   },
   {
+    path: 'shortlist',
+    loadComponent: () => import('./shortlist/shortlist.component').then(m => m.ShortlistPageComponent),
+  },
+  {
     path: 'counsellors/new',
     loadComponent: () => import('./counsellors/add-counsellor.component').then(m => m.AddCounsellorPageComponent),
   },
