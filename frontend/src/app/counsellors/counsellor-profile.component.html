@@ -1,0 +1,118 @@
+<div class="profile-wrapper">
+  @if (loading()) {
+    <mat-progress-spinner mode="indeterminate" class="profile-spinner" />
+  }
+
+  @if (notFound()) {
+    <mat-card>
+      <mat-card-content>Counsellor not found.</mat-card-content>
+    </mat-card>
+  }
+
+  @if (counsellor(); as c) {
+    <mat-card class="profile-card">
+      <div class="profile-header">
+        <div class="photo-container">
+          @if (c.photoUrl) {
+            <img [src]="c.photoUrl" [alt]="c.name + ' photo'" class="profile-photo" />
+          } @else {
+            <div class="photo-placeholder" aria-hidden="true">
+              <mat-icon>person</mat-icon>
+            </div>
+          }
+        </div>
+        <div class="profile-heading">
+          <h1 class="profile-name">{{ c.name }}</h1>
+          <p class="profile-denomination">{{ c.denomination }}</p>
+          @if (c.rating !== null) {
+            <p class="profile-rating">
+              <mat-icon aria-hidden="true">star</mat-icon>
+              {{ c.rating }} &mdash; {{ c.reviewCount }} review{{ c.reviewCount === 1 ? '' : 's' }}
+            </p>
+          }
+          @if (c.verified) {
+            <p class="profile-verified">
+              <mat-icon aria-hidden="true">verified</mat-icon>
+              Verified
+            </p>
+          }
+        </div>
+      </div>
+
+      <mat-divider />
+
+      <div class="profile-body">
+        <div class="profile-left">
+          <section class="profile-section">
+            <h2 class="section-title">Credentials</h2>
+            <mat-chip-set>
+              @for (cred of c.credentials; track cred) {
+                <mat-chip>{{ cred }}</mat-chip>
+              }
+            </mat-chip-set>
+          </section>
+
+          <section class="profile-section">
+            <h2 class="section-title">Specialties</h2>
+            <mat-chip-set>
+              @for (s of c.specialties; track s) {
+                <mat-chip>{{ s }}</mat-chip>
+              }
+            </mat-chip-set>
+          </section>
+
+          <section class="profile-section">
+            <h2 class="section-title">Contact</h2>
+            <p class="contact-line">
+              <mat-icon aria-hidden="true">location_on</mat-icon>
+              {{ c.address }}
+            </p>
+            <p class="contact-line">
+              <mat-icon aria-hidden="true">phone</mat-icon>
+              {{ c.phone }}
+            </p>
+            <p class="contact-line">
+              <mat-icon aria-hidden="true">email</mat-icon>
+              {{ c.email }}
+            </p>
+            @if (c.website) {
+              <p class="contact-line">
+                <mat-icon aria-hidden="true">language</mat-icon>
+                <a [href]="c.website" target="_blank" rel="noopener noreferrer">{{ c.website }}</a>
+              </p>
+            }
+          </section>
+
+          @if (c.bookingLink) {
+            <a mat-raised-button color="primary" [href]="c.bookingLink" target="_blank" rel="noopener noreferrer" class="booking-btn">
+              <mat-icon>calendar_today</mat-icon>
+              Book Appointment
+            </a>
+          }
+        </div>
+
+        <div class="profile-right">
+          <mat-card class="actions-card">
+            <mat-card-actions>
+              <button mat-raised-button color="accent" (click)="shortlist()">
+                <mat-icon>bookmark_add</mat-icon>
+                Shortlist
+              </button>
+            </mat-card-actions>
+          </mat-card>
+
+          <mat-card class="reviews-card">
+            <mat-card-header>
+              <mat-card-title>Reviews</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              @if (c.reviewCount === 0) {
+                <p class="no-reviews">No reviews yet.</p>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-card>
+  }
+</div>
