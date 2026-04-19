@@ -20,6 +20,7 @@ import { InMemoryNotificationStore } from './auth/notification-store.ts';
 import { createCreateIntentHandler, createGetCurrentIntentHandler, createUpdateIntentStatusHandler } from './appointment/appointment.ts';
 import { InMemoryAppointmentStore } from './appointment/appointment-store.ts';
 import { createCreatePrivateNoteHandler, createListPrivateNotesHandler, createUpdatePrivateNoteHandler, createDeletePrivateNoteHandler } from './notes/private-notes.ts';
+import { createCreateSpouseNoteHandler, createListSpouseNotesHandler, createUpdateSpouseNoteHandler, createDeleteSpouseNoteHandler } from './notes/spouse-notes.ts';
 import { InMemoryNoteStore } from './notes/note.ts';
 import { InMemoryRatingStore } from './counsellor/rating-store.ts';
 import { InMemoryReviewStore } from './counsellor/review-store.ts';
@@ -101,6 +102,10 @@ const createPrivateNoteHandler = createCreatePrivateNoteHandler({ noteStore, ses
 const listPrivateNotesHandler = createListPrivateNotesHandler({ noteStore, sessionStore });
 const updatePrivateNoteHandler = createUpdatePrivateNoteHandler({ noteStore, sessionStore });
 const deletePrivateNoteHandler = createDeletePrivateNoteHandler({ noteStore, sessionStore });
+const createSpouseNoteHandler = createCreateSpouseNoteHandler({ noteStore, sessionStore, userStore });
+const listSpouseNotesHandler = createListSpouseNotesHandler({ noteStore, sessionStore, userStore });
+const updateSpouseNoteHandler = createUpdateSpouseNoteHandler({ noteStore, sessionStore });
+const deleteSpouseNoteHandler = createDeleteSpouseNoteHandler({ noteStore, sessionStore });
 const createIntentHandler = createCreateIntentHandler({ appointmentStore, sessionStore, userStore });
 const getCurrentIntentHandler = createGetCurrentIntentHandler({ appointmentStore, sessionStore, userStore });
 const updateIntentStatusHandler = createUpdateIntentStatusHandler({ appointmentStore, sessionStore });
@@ -197,21 +202,37 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     return;
   }
   if (req.method === 'POST' && path === '/api/notes') {
-    createPrivateNoteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    if (url.searchParams.get('visibility') === 'spouse') {
+      createSpouseNoteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    } else {
+      createPrivateNoteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    }
     return;
   }
   if (req.method === 'GET' && path === '/api/notes') {
-    listPrivateNotesHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    if (url.searchParams.get('visibility') === 'spouse') {
+      listSpouseNotesHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    } else {
+      listPrivateNotesHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    }
     return;
   }
   if (req.method === 'PUT' && path.startsWith('/api/notes/')) {
     const id = path.slice('/api/notes/'.length);
-    updatePrivateNoteHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    (async () => {
+      const note = await noteStore.findById(id);
+      if (note?.visibility === 'spouse') return updateSpouseNoteHandler(req, res, id);
+      return updatePrivateNoteHandler(req, res, id);
+    })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (req.method === 'DELETE' && path.startsWith('/api/notes/')) {
     const id = path.slice('/api/notes/'.length);
-    deletePrivateNoteHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    (async () => {
+      const note = await noteStore.findById(id);
+      if (note?.visibility === 'spouse') return deleteSpouseNoteHandler(req, res, id);
+      return deletePrivateNoteHandler(req, res, id);
+    })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/shortlist/')) {
