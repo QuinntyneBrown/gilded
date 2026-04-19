@@ -206,6 +206,19 @@ export class CounsellorProfilePageComponent implements OnInit {
     this.pageIndex.set(event.pageIndex);
   }
 
+  readonly bookingExpanded = signal(false);
+  readonly intentCreated = signal(false);
+
+  makeAppointment(): void {
+    const id = this.counsellor()?.id;
+    if (!id) return;
+    this.bookingExpanded.set(true);
+    this.http.post('/api/appointment-intent', { counsellorId: id }).subscribe({
+      next: () => this.intentCreated.set(true),
+      error: () => this.intentCreated.set(true),
+    });
+  }
+
   shortlist(): void {
     // T-035
   }

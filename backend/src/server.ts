@@ -17,6 +17,8 @@ import { createAddToShortlistHandler, createRemoveFromShortlistHandler, createGe
 import { InMemoryShortlistStore } from './shortlist/shortlist-store.ts';
 import { createChosenCounsellorHandler, createGetNotificationsHandler } from './couple/chosen.ts';
 import { InMemoryNotificationStore } from './auth/notification-store.ts';
+import { createCreateIntentHandler, createGetCurrentIntentHandler, createUpdateIntentStatusHandler } from './appointment/appointment.ts';
+import { InMemoryAppointmentStore } from './appointment/appointment-store.ts';
 import { InMemoryRatingStore } from './counsellor/rating-store.ts';
 import { InMemoryReviewStore } from './counsellor/review-store.ts';
 import { InMemoryCommentStore } from './counsellor/comment-store.ts';
@@ -57,6 +59,7 @@ const reviewStore = new InMemoryReviewStore();
 const commentStore = new InMemoryCommentStore();
 const shortlistStore = new InMemoryShortlistStore();
 const notificationStore = new InMemoryNotificationStore();
+const appointmentStore = new InMemoryAppointmentStore();
 const postalCache = new InMemoryPostalCodeCache();
 const geocodingService = new GeocodingService(postalCache, {
   geocode: async () => { throw new Error('GEOCODING_API_KEY not configured'); },
@@ -91,6 +94,9 @@ const deleteCommentHandler = createDeleteCommentHandler({ commentStore, reviewSt
 const uploadPhotoHandler = createUploadPhotoHandler({ counsellorStore });
 const servePhotoHandler = createServePhotoHandler({ counsellorStore });
 const searchCounsellorsHandler = createSearchCounsellorsHandler({ counsellorStore, geocodingService });
+const createIntentHandler = createCreateIntentHandler({ appointmentStore, sessionStore, userStore });
+const getCurrentIntentHandler = createGetCurrentIntentHandler({ appointmentStore, sessionStore, userStore });
+const updateIntentStatusHandler = createUpdateIntentStatusHandler({ appointmentStore, sessionStore });
 const chosenCounsellorHandler = createChosenCounsellorHandler({ coupleStore, counsellorStore, notificationStore, sessionStore, userStore, mailer: authDeps.mailer });
 const getNotificationsHandler = createGetNotificationsHandler({ notificationStore, sessionStore });
 const addToShortlistHandler = createAddToShortlistHandler({ shortlistStore, sessionStore, userStore });
@@ -163,6 +169,24 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   }
   if (req.method === 'GET' && path === '/api/me/notifications') {
     getNotificationsHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path === '/api/appointment-intent') {
+    createIntentHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'GET' && path === '/api/me/appointment-intent/current') {
+    getCurrentIntentHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path.startsWith('/api/appointment-intent/') && path.endsWith('/booked')) {
+    const id = path.slice('/api/appointment-intent/'.length, -'/booked'.length);
+    updateIntentStatusHandler(req, res, id, 'booked').catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path.startsWith('/api/appointment-intent/') && path.endsWith('/cancelled')) {
+    const id = path.slice('/api/appointment-intent/'.length, -'/cancelled'.length);
+    updateIntentStatusHandler(req, res, id, 'cancelled').catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/shortlist/')) {

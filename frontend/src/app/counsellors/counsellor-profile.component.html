@@ -116,8 +116,43 @@
                 <mat-icon>bookmark_add</mat-icon>
                 Shortlist
               </button>
+              <button mat-raised-button color="primary" (click)="makeAppointment()">
+                <mat-icon>calendar_today</mat-icon>
+                Make Appointment
+              </button>
             </mat-card-actions>
           </mat-card>
+
+          @if (bookingExpanded()) {
+            <mat-card data-booking-panel class="booking-panel">
+              <mat-card-header>
+                <mat-card-title>Book an Appointment</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                @if (counsellor()?.bookingLink) {
+                  <a
+                    mat-raised-button
+                    color="primary"
+                    [href]="counsellor()!.bookingLink!"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-booking-link
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    Book Online
+                  </a>
+                }
+                <p class="contact-line">
+                  <mat-icon aria-hidden="true">phone</mat-icon>
+                  {{ counsellor()?.phone }}
+                </p>
+                <p class="contact-line">
+                  <mat-icon aria-hidden="true">email</mat-icon>
+                  {{ counsellor()?.email }}
+                </p>
+              </mat-card-content>
+            </mat-card>
+          }
         </div>
       </div>
 

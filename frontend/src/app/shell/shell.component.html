@@ -35,6 +35,25 @@
       <span class="mat-headline-6">Gilded</span>
     </mat-toolbar>
 
+    @if (pendingIntent()) {
+      <mat-card data-appointment-banner class="appointment-banner">
+        <mat-card-content>
+          <mat-icon aria-hidden="true">calendar_today</mat-icon>
+          You have a pending appointment. Did you book it?
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button color="primary" (click)="dismissIntent('booked')">
+            <mat-icon>check</mat-icon>
+            Booked
+          </button>
+          <button mat-button (click)="dismissIntent('cancelled')">
+            <mat-icon>close</mat-icon>
+            Cancel
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+
     <main>
       <router-outlet />
     </main>
