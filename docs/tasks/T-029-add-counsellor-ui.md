@@ -48,6 +48,6 @@ Ship `/counsellors/new`: Material-only form covering all required fields. On suc
 - Duplicate submission surfaces existing counsellor via dialog link.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
