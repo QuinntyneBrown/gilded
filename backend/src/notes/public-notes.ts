@@ -4,6 +4,7 @@ import type { NoteStore, Note } from './note.ts';
 import type { SessionStore } from '../auth/session-store.ts';
 import type { UserStore } from '../auth/user-store.ts';
 import { evaluate } from '../moderation/ruleset.ts';
+import type { SlidingWindowLimiter } from '../auth/global-rate-limiter.ts';
 
 function parseCookies(header: string): Record<string, string> {
   return Object.fromEntries(
@@ -28,12 +29,17 @@ interface PublicNoteDeps {
   noteStore: NoteStore;
   sessionStore: SessionStore;
   userStore: UserStore;
+  limiter?: SlidingWindowLimiter;
 }
 
-export function createCreatePublicNoteHandler({ noteStore, sessionStore, userStore }: PublicNoteDeps) {
+export function createCreatePublicNoteHandler({ noteStore, sessionStore, userStore, limiter }: PublicNoteDeps) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     const session = await requireSession(req, sessionStore);
     if (!session) { res.writeHead(401, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Authentication required.' })); return; }
+    if (limiter) {
+      const { limited, retryAfterSecs } = limiter.checkAndRecord(session.userId + ':creates');
+      if (limited) { res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSecs) }); res.end(JSON.stringify({ error: 'Too many creations. Try again later.' })); return; }
+    }
 
     let data = '';
     await new Promise<void>((resolve, reject) => { req.on('data', c => (data += c)); req.on('end', () => resolve()); req.on('error', reject); });

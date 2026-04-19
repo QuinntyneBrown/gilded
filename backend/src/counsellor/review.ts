@@ -5,12 +5,14 @@ import type { ReviewStore, Review } from './review-store.ts';
 import type { SessionStore } from '../auth/session-store.ts';
 import type { UserStore } from '../auth/user-store.ts';
 import { evaluate } from '../moderation/ruleset.ts';
+import type { SlidingWindowLimiter } from '../auth/global-rate-limiter.ts';
 
 interface ReviewDeps {
   counsellorStore: CounsellorStore;
   reviewStore: ReviewStore;
   sessionStore: SessionStore;
   userStore: UserStore;
+  limiter?: SlidingWindowLimiter;
 }
 
 function parseCookies(header: string): Record<string, string> {
@@ -31,13 +33,17 @@ function renderReview(r: Review) {
   return { id: r.id, counsellorId: r.counsellorId, authorId: r.authorId, body: r.body, createdAt: r.createdAt.toISOString() };
 }
 
-export function createPostReviewHandler({ counsellorStore, reviewStore, sessionStore }: ReviewDeps) {
+export function createPostReviewHandler({ counsellorStore, reviewStore, sessionStore, limiter }: ReviewDeps) {
   return async (req: IncomingMessage, res: ServerResponse, counsellorId: string): Promise<void> => {
     const session = await requireSession(req, sessionStore);
     if (!session) {
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Authentication required.' }));
       return;
+    }
+    if (limiter) {
+      const { limited, retryAfterSecs } = limiter.checkAndRecord(session.userId + ':creates');
+      if (limited) { res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSecs) }); res.end(JSON.stringify({ error: 'Too many creations. Try again later.' })); return; }
     }
     const counsellor = await counsellorStore.findById(counsellorId);
     if (!counsellor) {
