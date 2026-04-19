@@ -1,0 +1,23 @@
+.spouse-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+mat-card {
+  width: 100%;
+
+  @media (min-width: 768px) {
+    max-width: 480px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.spouse-error {
+  color: var(--mat-sys-error);
+  margin: 8px 0;
+  font-size: 0.875rem;
+}

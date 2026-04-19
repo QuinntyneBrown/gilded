@@ -21,4 +21,8 @@ export const routes: Routes = [
     path: 'reset-complete',
     loadComponent: () => import('./reset-complete/reset-complete.component').then(m => m.ResetCompletePageComponent),
   },
+  {
+    path: 'settings/spouse',
+    loadComponent: () => import('./settings/spouse-settings.component').then(m => m.SpouseSettingsPageComponent),
+  },
 ];

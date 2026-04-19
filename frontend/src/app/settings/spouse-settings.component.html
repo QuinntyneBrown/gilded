@@ -1,0 +1,73 @@
+<div class="spouse-wrapper">
+  @if (state() === 'loading') {
+    <mat-progress-spinner mode="indeterminate" />
+  }
+
+  @if (state() === 'linked') {
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Linked to {{ spouseEmail() }}</mat-card-title>
+      </mat-card-header>
+      @if (errorMessage()) {
+        <mat-card-content>
+          <p class="spouse-error" role="alert">{{ errorMessage() }}</p>
+        </mat-card-content>
+      }
+      <mat-card-actions>
+        <button mat-raised-button color="warn" (click)="unlink()">Unlink</button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  @if (state() === 'pending_accept') {
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Couple Invitation</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>You have a pending couple invitation.</p>
+        @if (errorMessage()) {
+          <p class="spouse-error" role="alert">{{ errorMessage() }}</p>
+        }
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="accept()" [disabled]="accepting()">
+          @if (accepting()) {
+            <mat-progress-spinner mode="indeterminate" diameter="20" />
+          } @else {
+            Accept
+          }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  @if (state() === 'unlinked') {
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Invite a Spouse</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (inviteMessage()) {
+          <p role="status">{{ inviteMessage() }}</p>
+        }
+        <form [formGroup]="inviteForm" (ngSubmit)="invite()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Spouse email</mat-label>
+            <input matInput type="email" formControlName="email" autocomplete="email" />
+          </mat-form-field>
+          @if (errorMessage()) {
+            <p class="spouse-error" role="alert">{{ errorMessage() }}</p>
+          }
+          <button mat-raised-button color="primary" type="submit" [disabled]="inviting()">
+            @if (inviting()) {
+              <mat-progress-spinner mode="indeterminate" diameter="20" />
+            } @else {
+              Send Invitation
+            }
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
