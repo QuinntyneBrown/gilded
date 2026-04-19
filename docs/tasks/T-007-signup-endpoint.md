@@ -46,7 +46,7 @@ Ship `POST /api/auth/signup` that creates a `pending_verification` user, hashes 
 3. Given a weak or malformed password, when submitted, then a 400 is returned without creating an account.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
-- [ ] No plaintext password stored or logged anywhere.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
+- [x] No plaintext password stored or logged anywhere.
