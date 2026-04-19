@@ -11,7 +11,9 @@ import { createGetCounsellorHandler } from './counsellor/counsellor.ts';
 import { createSubmitCounsellorHandler } from './counsellor/submit.ts';
 import { createListPendingHandler, createApproveHandler, createRejectHandler } from './counsellor/moderate.ts';
 import { createRateCounsellorHandler } from './counsellor/rating.ts';
+import { createPostReviewHandler, createGetReviewsHandler, createDeleteReviewHandler } from './counsellor/review.ts';
 import { InMemoryRatingStore } from './counsellor/rating-store.ts';
+import { InMemoryReviewStore } from './counsellor/review-store.ts';
 import { createUploadPhotoHandler, createServePhotoHandler } from './counsellor/photo.ts';
 import { createSearchCounsellorsHandler } from './counsellor/search.ts';
 import { GeocodingService } from './geo/geocoding.ts';
@@ -44,6 +46,7 @@ const sessionStore = new InMemorySessionStore();
 const coupleStore = new InMemoryCoupleStore();
 const counsellorStore = new InMemoryCounsellorStore();
 const ratingStore = new InMemoryRatingStore();
+const reviewStore = new InMemoryReviewStore();
 const postalCache = new InMemoryPostalCodeCache();
 const geocodingService = new GeocodingService(postalCache, {
   geocode: async () => { throw new Error('GEOCODING_API_KEY not configured'); },
@@ -69,6 +72,9 @@ const listPendingHandler = createListPendingHandler({ counsellorStore, sessionSt
 const approveHandler = createApproveHandler({ counsellorStore, sessionStore, userStore, mailer: authDeps.mailer });
 const rejectHandler = createRejectHandler({ counsellorStore, sessionStore, userStore, mailer: authDeps.mailer });
 const rateCounsellorHandler = createRateCounsellorHandler({ counsellorStore, ratingStore, sessionStore });
+const postReviewHandler = createPostReviewHandler({ counsellorStore, reviewStore, sessionStore, userStore });
+const getReviewsHandler = createGetReviewsHandler({ counsellorStore, reviewStore, sessionStore, userStore });
+const deleteReviewHandler = createDeleteReviewHandler({ counsellorStore, reviewStore, sessionStore, userStore });
 const uploadPhotoHandler = createUploadPhotoHandler({ counsellorStore });
 const servePhotoHandler = createServePhotoHandler({ counsellorStore });
 const searchCounsellorsHandler = createSearchCounsellorsHandler({ counsellorStore, geocodingService });
@@ -161,6 +167,21 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   }
   if (req.method === 'GET' && path === '/api/counsellors') {
     searchCounsellorsHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path.startsWith('/api/counsellors/') && path.endsWith('/reviews')) {
+    const id = path.slice('/api/counsellors/'.length, -'/reviews'.length);
+    postReviewHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'GET' && path.startsWith('/api/counsellors/') && path.endsWith('/reviews')) {
+    const id = path.slice('/api/counsellors/'.length, -'/reviews'.length);
+    getReviewsHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'DELETE' && path.startsWith('/api/reviews/')) {
+    const id = path.slice('/api/reviews/'.length);
+    deleteReviewHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (req.method === 'GET' && path.startsWith('/api/counsellors/')) {
