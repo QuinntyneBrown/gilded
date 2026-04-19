@@ -25,7 +25,7 @@ export function createGetCounsellorHandler({ counsellorStore }: { counsellorStor
       verified: counsellor.verified,
       submittedBy: counsellor.submittedBy ?? null,
       sourceUrl: counsellor.sourceUrl ?? null,
-      photoUrl: counsellor.photoUrl ?? null,
+      photoUrl: counsellor.photoFilename ? `/api/counsellors/${counsellor.id}/photo` : (counsellor.photoUrl ?? null),
       rating: counsellor.reviewCount > 0 ? (counsellor.rating ?? null) : null,
       reviewCount: counsellor.reviewCount,
     }));

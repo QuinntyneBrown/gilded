@@ -22,12 +22,14 @@ export interface Counsellor {
   reviewCount: number;
   lat?: number;
   lng?: number;
+  photoFilename?: string;
 }
 
 export interface CounsellorStore {
   create(counsellor: Counsellor): Promise<void>;
   findById(id: string): Promise<Counsellor | null>;
   findAll(): Promise<Counsellor[]>;
+  updatePhoto(id: string, filename: string): Promise<void>;
 }
 
 export class InMemoryCounsellorStore implements CounsellorStore {
@@ -43,5 +45,10 @@ export class InMemoryCounsellorStore implements CounsellorStore {
 
   async findAll(): Promise<Counsellor[]> {
     return [...this.byId.values()];
+  }
+
+  async updatePhoto(id: string, filename: string): Promise<void> {
+    const c = this.byId.get(id);
+    if (c) c.photoFilename = filename;
   }
 }
