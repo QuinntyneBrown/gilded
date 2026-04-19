@@ -41,6 +41,7 @@ import type { CaptchaVerifier } from './auth/captcha.ts';
 import { NodemailerMailer } from './auth/mailer.ts';
 import type { Mailer } from './auth/mailer.ts';
 import { createRequestMiddleware, ConsoleLogger } from './logger.ts';
+import { recordRequest, createMetricsHandler } from './metrics.ts';
 
 const CAPTURE = process.env['CAPTURE_EMAILS'] === '1';
 const captureLog: { email: string; token: string }[] = [];
@@ -137,7 +138,18 @@ eventBus.on('CoupleCreated', (event) => {
   ]).catch(console.error);
 });
 
-const requestLogger = createRequestMiddleware({ logger: new ConsoleLogger() });
+const consoleLogger = new ConsoleLogger();
+const requestLogger = createRequestMiddleware({
+  logger: {
+    logRequest(entry) {
+      consoleLogger.logRequest(entry);
+      recordRequest(entry.method, entry.route, entry.status, entry.latencyMs / 1000);
+    },
+  },
+});
+
+const metricsToken = process.env['METRICS_TOKEN'];
+const metricsHandler = createMetricsHandler(metricsToken);
 
 function rejectRateLimit(req: IncomingMessage, res: ServerResponse): boolean {
   const { limited, retryAfterSecs } = globalRateLimiter.checkAndRecord(ipKey(req));
@@ -163,6 +175,10 @@ async function routeRequest(req: IncomingMessage, res: ServerResponse): Promise<
   if (req.method === 'GET' && path === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'ok' }));
+    return;
+  }
+  if (req.method === 'GET' && path === '/metrics') {
+    await metricsHandler(req, res);
     return;
   }
   if (req.method === 'POST' && path === '/api/auth/signup') {
