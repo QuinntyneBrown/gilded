@@ -40,6 +40,6 @@ Ship a single `ModerationRuleset.evaluate(text): 'allow' | 'flag' | 'reject'`. C
 3. Given text with >= 4 links, when evaluated, then the result is `'reject'`.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
