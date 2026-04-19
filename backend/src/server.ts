@@ -6,9 +6,11 @@ import { createLoginHandler, createMeHandler } from './auth/login.ts';
 import { createLogoutHandler } from './auth/logout.ts';
 import { createResetRequestHandler, createResetCompleteHandler } from './auth/reset.ts';
 import { createInviteHandler, createAcceptHandler } from './couple/invite.ts';
+import { createUnlinkHandler } from './couple/unlink.ts';
 import { InMemoryUserStore } from './auth/user-store.ts';
 import { InMemorySessionStore } from './auth/session-store.ts';
 import { InMemoryCoupleStore } from './couple/couple-store.ts';
+import { EventBus } from './events.ts';
 import { LoginRateLimiter } from './auth/rate-limit.ts';
 import { NodemailerMailer } from './auth/mailer.ts';
 import type { Mailer } from './auth/mailer.ts';
@@ -29,6 +31,7 @@ function buildMailer(): Mailer {
 const userStore = new InMemoryUserStore();
 const sessionStore = new InMemorySessionStore();
 const coupleStore = new InMemoryCoupleStore();
+const eventBus = new EventBus();
 const authDeps = { userStore, mailer: buildMailer() };
 const sessionDeps = { userStore, sessionStore };
 
@@ -42,6 +45,7 @@ const resetRequestHandler = createResetRequestHandler({ userStore, mailer: authD
 const resetCompleteHandler = createResetCompleteHandler({ userStore, sessionStore });
 const inviteHandler = createInviteHandler({ userStore, coupleStore, mailer: authDeps.mailer, sessionStore });
 const acceptHandler = createAcceptHandler({ userStore, coupleStore, mailer: authDeps.mailer, sessionStore });
+const unlinkHandler = createUnlinkHandler({ userStore, coupleStore, sessionStore, eventBus });
 
 export function handler(req: IncomingMessage, res: ServerResponse): void {
   const url = new URL(req.url ?? '', 'http://x');
@@ -92,6 +96,10 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     acceptHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
+  if (req.method === 'POST' && path === '/api/couple/unlink') {
+    unlinkHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
   if (CAPTURE && req.method === 'GET' && path === '/api/dev/user') {
     const email = url.searchParams.get('email') ?? '';
     userStore.findByEmail(email).then(user => {
@@ -106,6 +114,11 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     const last = [...captureLog].reverse().find(e => e.email === email);
     res.writeHead(last ? 200 : 404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(last ?? { error: 'not found' }));
+    return;
+  }
+  if (CAPTURE && req.method === 'GET' && path === '/api/dev/events') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ events: eventBus.all() }));
     return;
   }
   if (CAPTURE && req.method === 'GET' && path === '/api/dev/session') {
