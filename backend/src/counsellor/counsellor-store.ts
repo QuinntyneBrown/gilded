@@ -29,6 +29,7 @@ export interface CounsellorStore {
   create(counsellor: Counsellor): Promise<void>;
   findById(id: string): Promise<Counsellor | null>;
   findBySourceUrl(sourceUrl: string): Promise<Counsellor | null>;
+  findDuplicate(normalizedName: string, normalizedAddress: string, phone: string, email: string): Promise<Counsellor | null>;
   findAll(): Promise<Counsellor[]>;
   updatePhoto(id: string, filename: string): Promise<void>;
 }
@@ -47,6 +48,15 @@ export class InMemoryCounsellorStore implements CounsellorStore {
   async findBySourceUrl(sourceUrl: string): Promise<Counsellor | null> {
     for (const c of this.byId.values()) {
       if (c.sourceUrl === sourceUrl) return c;
+    }
+    return null;
+  }
+
+  async findDuplicate(normalizedName: string, normalizedAddress: string, phone: string, email: string): Promise<Counsellor | null> {
+    for (const c of this.byId.values()) {
+      if (phone && c.phone === phone) return c;
+      if (email && c.email === email) return c;
+      if (normalizedName && c.normalizedName === normalizedName && c.normalizedAddress === normalizedAddress) return c;
     }
     return null;
   }

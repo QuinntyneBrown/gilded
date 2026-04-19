@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "concurrently --kill-others-on-fail \"npm:dev:frontend\" \"npm:dev:backend\"",
     "seed:counsellors": "tsx backend/scripts/seed-counsellors.ts",
+    "ingest:counsellors": "tsx backend/scripts/ingest-counsellors.ts",
     "dev:frontend": "cd frontend && ng serve",
     "dev:backend": "tsx watch backend/src/server.ts",
     "build": "cd frontend && ng build",
