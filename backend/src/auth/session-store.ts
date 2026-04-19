@@ -10,6 +10,7 @@ export interface SessionStore {
   findById(id: string): Promise<Session | null>;
   touch(id: string, lastSeenAt: Date, expiresAt: Date): Promise<void>;
   delete(id: string): Promise<void>;
+  deleteByUserId(userId: string): Promise<void>;
 }
 
 export class InMemorySessionStore implements SessionStore {
@@ -30,5 +31,11 @@ export class InMemorySessionStore implements SessionStore {
 
   async delete(id: string): Promise<void> {
     this.sessions.delete(id);
+  }
+
+  async deleteByUserId(userId: string): Promise<void> {
+    for (const [id, s] of this.sessions) {
+      if (s.userId === userId) this.sessions.delete(id);
+    }
   }
 }

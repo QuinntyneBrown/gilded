@@ -4,7 +4,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { randomBytes, createHash, randomUUID } from 'node:crypto';
+import { randomBytes, createHash } from 'node:crypto';
 import { requestPasswordReset, completePasswordReset } from './reset.ts';
 import { InMemoryUserStore } from './user-store.ts';
 import { InMemorySessionStore } from './session-store.ts';
@@ -12,7 +12,6 @@ import { signupUser } from './signup.ts';
 import { verifyEmail } from './verify.ts';
 import { loginUser } from './login.ts';
 import type { Mailer } from './mailer.ts';
-import type { User } from './user-store.ts';
 
 const PASSWORD = 'ValidPass123!';
 
@@ -79,7 +78,6 @@ test('completePasswordReset returns ok and invalidates sessions', async () => {
 test('completePasswordReset rejects expired token', async () => {
   const store = new InMemoryUserStore();
   const sessionStore = new InMemorySessionStore();
-  const { mailer } = fakeMailer();
   await setupActiveUser('reset-expired@example.com', store);
 
   const user = await store.findByEmail('reset-expired@example.com');

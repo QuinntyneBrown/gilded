@@ -12,7 +12,7 @@ function fakeMailer(): { mailer: Mailer; sent: string[] } {
   const sent: string[] = [];
   return {
     sent,
-    mailer: { sendVerification: (email) => { sent.push(email); return Promise.resolve(); } },
+    mailer: { sendVerification: (email) => { sent.push(email); return Promise.resolve(); }, sendReset: () => Promise.resolve() },
   };
 }
 

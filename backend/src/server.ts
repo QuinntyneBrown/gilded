@@ -4,6 +4,7 @@ import { createSignupHandler } from './auth/signup.ts';
 import { createVerifyHandler, createResendHandler } from './auth/verify.ts';
 import { createLoginHandler, createMeHandler } from './auth/login.ts';
 import { createLogoutHandler } from './auth/logout.ts';
+import { createResetRequestHandler, createResetCompleteHandler } from './auth/reset.ts';
 import { InMemoryUserStore } from './auth/user-store.ts';
 import { InMemorySessionStore } from './auth/session-store.ts';
 import { LoginRateLimiter } from './auth/rate-limit.ts';
@@ -11,15 +12,14 @@ import { NodemailerMailer } from './auth/mailer.ts';
 import type { Mailer } from './auth/mailer.ts';
 
 const CAPTURE = process.env['CAPTURE_EMAILS'] === '1';
-const emailLog: { email: string; token: string }[] = [];
+const captureLog: { email: string; token: string }[] = [];
 
 function buildMailer(): Mailer {
   const base = new NodemailerMailer();
   if (!CAPTURE) return base;
   return {
-    sendVerification: async (email, token) => {
-      emailLog.push({ email, token });
-    },
+    sendVerification: async (email, token) => { captureLog.push({ email, token }); },
+    sendReset: async (email, token) => { captureLog.push({ email, token }); },
   };
 }
 
@@ -34,6 +34,8 @@ const resendHandler = createResendHandler(authDeps);
 const loginHandler = createLoginHandler(sessionDeps, new LoginRateLimiter());
 const meHandler = createMeHandler(sessionDeps);
 const logoutHandler = createLogoutHandler({ sessionStore });
+const resetRequestHandler = createResetRequestHandler({ userStore, mailer: authDeps.mailer });
+const resetCompleteHandler = createResetCompleteHandler({ userStore, sessionStore });
 
 export function handler(req: IncomingMessage, res: ServerResponse): void {
   const url = new URL(req.url ?? '', 'http://x');
@@ -68,9 +70,17 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     logoutHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
+  if (req.method === 'POST' && path === '/api/auth/reset-request') {
+    resetRequestHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path === '/api/auth/reset-complete') {
+    resetCompleteHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
   if (CAPTURE && req.method === 'GET' && path === '/api/dev/last-token') {
     const email = url.searchParams.get('email') ?? '';
-    const last = [...emailLog].reverse().find(e => e.email === email);
+    const last = [...captureLog].reverse().find(e => e.email === email);
     res.writeHead(last ? 200 : 404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(last ?? { error: 'not found' }));
     return;
