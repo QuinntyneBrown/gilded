@@ -28,6 +28,7 @@ export interface Counsellor {
 export interface CounsellorStore {
   create(counsellor: Counsellor): Promise<void>;
   findById(id: string): Promise<Counsellor | null>;
+  findBySourceUrl(sourceUrl: string): Promise<Counsellor | null>;
   findAll(): Promise<Counsellor[]>;
   updatePhoto(id: string, filename: string): Promise<void>;
 }
@@ -41,6 +42,13 @@ export class InMemoryCounsellorStore implements CounsellorStore {
 
   async findById(id: string): Promise<Counsellor | null> {
     return this.byId.get(id) ?? null;
+  }
+
+  async findBySourceUrl(sourceUrl: string): Promise<Counsellor | null> {
+    for (const c of this.byId.values()) {
+      if (c.sourceUrl === sourceUrl) return c;
+    }
+    return null;
   }
 
   async findAll(): Promise<Counsellor[]> {

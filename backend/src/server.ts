@@ -158,6 +158,15 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
         req.on('error', reject);
       });
       const body = JSON.parse(data) as Record<string, unknown>;
+      const incomingSourceUrl = body['sourceUrl'] as string | undefined;
+      if (incomingSourceUrl) {
+        const existing = await counsellorStore.findBySourceUrl(incomingSourceUrl);
+        if (existing) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ id: existing.id }));
+          return;
+        }
+      }
       const { randomUUID } = await import('node:crypto');
       const counsellor = {
         id: randomUUID(),
@@ -175,7 +184,7 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
         source: (body['source'] as 'web_research' | 'user_submitted') ?? 'web_research',
         verified: Boolean(body['verified'] ?? false),
         submittedBy: body['submittedBy'] as string | undefined,
-        sourceUrl: body['sourceUrl'] as string | undefined,
+        sourceUrl: incomingSourceUrl,
         photoUrl: body['photoUrl'] as string | undefined,
         rating: body['rating'] as number | undefined,
         reviewCount: Number(body['reviewCount'] ?? 0),
