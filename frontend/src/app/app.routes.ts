@@ -13,4 +13,12 @@ export const routes: Routes = [
     path: 'search',
     loadComponent: () => import('./search/search.component').then(m => m.SearchPageComponent),
   },
+  {
+    path: 'reset-request',
+    loadComponent: () => import('./reset-request/reset-request.component').then(m => m.ResetRequestPageComponent),
+  },
+  {
+    path: 'reset-complete',
+    loadComponent: () => import('./reset-complete/reset-complete.component').then(m => m.ResetCompletePageComponent),
+  },
 ];
