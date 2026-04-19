@@ -7,9 +7,11 @@ import { createLogoutHandler } from './auth/logout.ts';
 import { createResetRequestHandler, createResetCompleteHandler } from './auth/reset.ts';
 import { createInviteHandler, createAcceptHandler } from './couple/invite.ts';
 import { createUnlinkHandler } from './couple/unlink.ts';
+import { createGetCounsellorHandler } from './counsellor/counsellor.ts';
 import { InMemoryUserStore } from './auth/user-store.ts';
 import { InMemorySessionStore } from './auth/session-store.ts';
 import { InMemoryCoupleStore } from './couple/couple-store.ts';
+import { InMemoryCounsellorStore } from './counsellor/counsellor-store.ts';
 import { EventBus } from './events.ts';
 import { LoginRateLimiter } from './auth/rate-limit.ts';
 import { NodemailerMailer } from './auth/mailer.ts';
@@ -31,6 +33,7 @@ function buildMailer(): Mailer {
 const userStore = new InMemoryUserStore();
 const sessionStore = new InMemorySessionStore();
 const coupleStore = new InMemoryCoupleStore();
+const counsellorStore = new InMemoryCounsellorStore();
 const eventBus = new EventBus();
 const authDeps = { userStore, mailer: buildMailer() };
 const sessionDeps = { userStore, sessionStore };
@@ -46,6 +49,7 @@ const resetCompleteHandler = createResetCompleteHandler({ userStore, sessionStor
 const inviteHandler = createInviteHandler({ userStore, coupleStore, mailer: authDeps.mailer, sessionStore });
 const acceptHandler = createAcceptHandler({ userStore, coupleStore, mailer: authDeps.mailer, sessionStore });
 const unlinkHandler = createUnlinkHandler({ userStore, coupleStore, sessionStore, eventBus });
+const getCounsellorHandler = createGetCounsellorHandler({ counsellorStore });
 
 export function handler(req: IncomingMessage, res: ServerResponse): void {
   const url = new URL(req.url ?? '', 'http://x');
@@ -98,6 +102,48 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   }
   if (req.method === 'POST' && path === '/api/couple/unlink') {
     unlinkHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'GET' && path.startsWith('/api/counsellors/')) {
+    const id = path.slice('/api/counsellors/'.length);
+    getCounsellorHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (CAPTURE && req.method === 'POST' && path === '/api/dev/seed/counsellor') {
+    (async () => {
+      let data = '';
+      await new Promise<void>((resolve, reject) => {
+        req.on('data', (c) => (data += c));
+        req.on('end', () => resolve());
+        req.on('error', reject);
+      });
+      const body = JSON.parse(data) as Record<string, unknown>;
+      const { randomUUID } = await import('node:crypto');
+      const counsellor = {
+        id: randomUUID(),
+        name: String(body['name'] ?? ''),
+        normalizedName: String(body['name'] ?? '').toLowerCase().trim(),
+        denomination: String(body['denomination'] ?? ''),
+        credentials: (body['credentials'] as string[]) ?? [],
+        specialties: (body['specialties'] as string[]) ?? [],
+        address: String(body['address'] ?? ''),
+        normalizedAddress: String(body['address'] ?? '').toLowerCase().trim(),
+        phone: String(body['phone'] ?? ''),
+        email: String(body['email'] ?? ''),
+        website: body['website'] as string | undefined,
+        bookingLink: body['bookingLink'] as string | undefined,
+        source: (body['source'] as 'web_research' | 'user_submitted') ?? 'web_research',
+        verified: Boolean(body['verified'] ?? false),
+        submittedBy: body['submittedBy'] as string | undefined,
+        sourceUrl: body['sourceUrl'] as string | undefined,
+        photoUrl: body['photoUrl'] as string | undefined,
+        rating: body['rating'] as number | undefined,
+        reviewCount: Number(body['reviewCount'] ?? 0),
+      };
+      await counsellorStore.create(counsellor);
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ id: counsellor.id }));
+    })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (CAPTURE && req.method === 'GET' && path === '/api/dev/user') {
