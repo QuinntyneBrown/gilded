@@ -6,6 +6,15 @@ const angular = require("angular-eslint");
 
 module.exports = defineConfig([
   {
+    ignores: [
+      "dist/**",
+      ".angular/**",
+      "coverage/**",
+      "playwright-report/**",
+      "test-results/**",
+    ],
+  },
+  {
     files: ["**/*.ts"],
     extends: [
       eslint.configs.recommended,
@@ -15,6 +24,7 @@ module.exports = defineConfig([
     ],
     processor: angular.processInlineTemplates,
     rules: {
+      "no-undef": "off",
       "@angular-eslint/directive-selector": [
         "error",
         {

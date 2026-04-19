@@ -2,12 +2,17 @@
   "name": "gilded",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "lint": "ng lint"
+    "dev": "concurrently --kill-others-on-fail \"npm:dev:frontend\" \"npm:dev:backend\"",
+    "dev:frontend": "cd frontend && ng serve",
+    "dev:backend": "tsx watch backend/src/server.ts",
+    "build": "cd frontend && ng build",
+    "test": "node --import tsx --test backend/src/server.test.ts",
+    "e2e": "playwright test",
+    "lint": "cd frontend && ng lint && cd .. && eslint \"backend/**/*.ts\" \"e2e/**/*.ts\" playwright.config.ts",
+    "typecheck": "npm run typecheck:frontend && npm run typecheck:backend",
+    "typecheck:frontend": "cd frontend && ng build",
+    "typecheck:backend": "tsc --noEmit -p backend/tsconfig.json",
+    "postinstall": "playwright install chromium"
   },
   "prettier": {
     "printWidth": 100,
