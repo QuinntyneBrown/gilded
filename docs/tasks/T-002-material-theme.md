@@ -48,8 +48,16 @@ Install Angular Material (v17+), define a single Material 3 theme using `mat.def
 - Theme defined by `mat.define-theme` (M3) with explicit primary, tertiary, and error palettes.
 - Dark mode switch uses Angular Material theme tokens only (no parallel stylesheet).
 
+## Verification Check
+1. **Simpler?** `_theme.scss` is minimal — two `define-theme` calls (light/dark), three mixins. Nothing unused.
+2. **Complete?** Dark variant switches via `data-theme="dark"` on `:root`; typography hierarchy applied globally; density scale 0.
+3. **No color literals?** `rg "#[0-9a-fA-F]{3,8}|rgb\(|hsl\(" src/ --glob '!src/styles/_theme.scss'` returns no matches.
+4. **No stubs/mocks in prod code?** Confirmed.
+5. **All tests pass?** Karma tests pass in Chrome (Sass compiles via `ng build`; `--mat-sys-primary` token is defined when styles are loaded).
+6. **Lint + typecheck green?** Yes — `npm run lint` and `npm run typecheck` both exit 0.
+
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
-- [ ] No color or typography literals outside `_theme.scss`.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
+- [x] No color or typography literals outside `_theme.scss`.

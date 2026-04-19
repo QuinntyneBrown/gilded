@@ -1,0 +1,38 @@
+// Source colors:
+//   primary  — violet (#6750A4, Material violet palette)
+//   tertiary — azure  (#0057B8, Material azure palette)
+//   error    — default red from violet palette
+
+@use '@angular/material' as mat;
+
+$_light: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$violet-palette,
+    tertiary: mat.$azure-palette,
+    use-system-variables: true,
+  ),
+  typography: (
+    plain-family: Roboto,
+    use-system-variables: true,
+  ),
+  density: (scale: 0),
+));
+
+$_dark: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$violet-palette,
+    tertiary: mat.$azure-palette,
+    use-system-variables: true,
+  ),
+));
+
+:root {
+  @include mat.all-component-themes($_light);
+  @include mat.typography-hierarchy($_light);
+}
+
+:root[data-theme='dark'] {
+  @include mat.all-component-colors($_dark);
+}
