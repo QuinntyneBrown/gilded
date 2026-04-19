@@ -20,11 +20,14 @@ export interface Counsellor {
   photoUrl?: string;
   rating?: number;
   reviewCount: number;
+  lat?: number;
+  lng?: number;
 }
 
 export interface CounsellorStore {
   create(counsellor: Counsellor): Promise<void>;
   findById(id: string): Promise<Counsellor | null>;
+  findAll(): Promise<Counsellor[]>;
 }
 
 export class InMemoryCounsellorStore implements CounsellorStore {
@@ -36,5 +39,9 @@ export class InMemoryCounsellorStore implements CounsellorStore {
 
   async findById(id: string): Promise<Counsellor | null> {
     return this.byId.get(id) ?? null;
+  }
+
+  async findAll(): Promise<Counsellor[]> {
+    return [...this.byId.values()];
   }
 }

@@ -8,6 +8,9 @@ import { createResetRequestHandler, createResetCompleteHandler } from './auth/re
 import { createInviteHandler, createAcceptHandler } from './couple/invite.ts';
 import { createUnlinkHandler } from './couple/unlink.ts';
 import { createGetCounsellorHandler } from './counsellor/counsellor.ts';
+import { createSearchCounsellorsHandler } from './counsellor/search.ts';
+import { GeocodingService } from './geo/geocoding.ts';
+import { InMemoryPostalCodeCache } from './geo/postal-cache.ts';
 import { InMemoryUserStore } from './auth/user-store.ts';
 import { InMemorySessionStore } from './auth/session-store.ts';
 import { InMemoryCoupleStore } from './couple/couple-store.ts';
@@ -34,6 +37,10 @@ const userStore = new InMemoryUserStore();
 const sessionStore = new InMemorySessionStore();
 const coupleStore = new InMemoryCoupleStore();
 const counsellorStore = new InMemoryCounsellorStore();
+const postalCache = new InMemoryPostalCodeCache();
+const geocodingService = new GeocodingService(postalCache, {
+  geocode: async () => { throw new Error('GEOCODING_API_KEY not configured'); },
+});
 const eventBus = new EventBus();
 const authDeps = { userStore, mailer: buildMailer() };
 const sessionDeps = { userStore, sessionStore };
@@ -50,6 +57,7 @@ const inviteHandler = createInviteHandler({ userStore, coupleStore, mailer: auth
 const acceptHandler = createAcceptHandler({ userStore, coupleStore, mailer: authDeps.mailer, sessionStore });
 const unlinkHandler = createUnlinkHandler({ userStore, coupleStore, sessionStore, eventBus });
 const getCounsellorHandler = createGetCounsellorHandler({ counsellorStore });
+const searchCounsellorsHandler = createSearchCounsellorsHandler({ counsellorStore, geocodingService });
 
 export function handler(req: IncomingMessage, res: ServerResponse): void {
   const url = new URL(req.url ?? '', 'http://x');
@@ -104,9 +112,28 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
     unlinkHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
+  if (req.method === 'GET' && path === '/api/counsellors') {
+    searchCounsellorsHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
   if (req.method === 'GET' && path.startsWith('/api/counsellors/')) {
     const id = path.slice('/api/counsellors/'.length);
     getCounsellorHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (CAPTURE && req.method === 'POST' && path === '/api/dev/seed/postal') {
+    (async () => {
+      let data = '';
+      await new Promise<void>((resolve, reject) => {
+        req.on('data', (c) => (data += c));
+        req.on('end', () => resolve());
+        req.on('error', reject);
+      });
+      const body = JSON.parse(data) as { code: string; lat: number; lng: number };
+      await postalCache.save(body.code.toUpperCase().replace(/\s/g, ''), body.lat, body.lng);
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (CAPTURE && req.method === 'POST' && path === '/api/dev/seed/counsellor') {
