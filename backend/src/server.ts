@@ -13,6 +13,8 @@ import { createListPendingHandler, createApproveHandler, createRejectHandler } f
 import { createRateCounsellorHandler } from './counsellor/rating.ts';
 import { createPostReviewHandler, createGetReviewsHandler, createDeleteReviewHandler } from './counsellor/review.ts';
 import { createPostCommentHandler, createGetCommentsHandler, createDeleteCommentHandler } from './counsellor/comment.ts';
+import { createAddToShortlistHandler, createRemoveFromShortlistHandler, createGetShortlistHandler } from './shortlist/shortlist.ts';
+import { InMemoryShortlistStore } from './shortlist/shortlist-store.ts';
 import { InMemoryRatingStore } from './counsellor/rating-store.ts';
 import { InMemoryReviewStore } from './counsellor/review-store.ts';
 import { InMemoryCommentStore } from './counsellor/comment-store.ts';
@@ -50,6 +52,7 @@ const counsellorStore = new InMemoryCounsellorStore();
 const ratingStore = new InMemoryRatingStore();
 const reviewStore = new InMemoryReviewStore();
 const commentStore = new InMemoryCommentStore();
+const shortlistStore = new InMemoryShortlistStore();
 const postalCache = new InMemoryPostalCodeCache();
 const geocodingService = new GeocodingService(postalCache, {
   geocode: async () => { throw new Error('GEOCODING_API_KEY not configured'); },
@@ -67,7 +70,7 @@ const logoutHandler = createLogoutHandler({ sessionStore });
 const resetRequestHandler = createResetRequestHandler({ userStore, mailer: authDeps.mailer });
 const resetCompleteHandler = createResetCompleteHandler({ userStore, sessionStore });
 const inviteHandler = createInviteHandler({ userStore, coupleStore, mailer: authDeps.mailer, sessionStore });
-const acceptHandler = createAcceptHandler({ userStore, coupleStore, mailer: authDeps.mailer, sessionStore });
+const acceptHandler = createAcceptHandler({ userStore, coupleStore, mailer: authDeps.mailer, sessionStore, eventBus });
 const unlinkHandler = createUnlinkHandler({ userStore, coupleStore, sessionStore, eventBus });
 const getCounsellorHandler = createGetCounsellorHandler({ counsellorStore });
 const submitCounsellorHandler = createSubmitCounsellorHandler({ counsellorStore, sessionStore });
@@ -84,6 +87,16 @@ const deleteCommentHandler = createDeleteCommentHandler({ commentStore, reviewSt
 const uploadPhotoHandler = createUploadPhotoHandler({ counsellorStore });
 const servePhotoHandler = createServePhotoHandler({ counsellorStore });
 const searchCounsellorsHandler = createSearchCounsellorsHandler({ counsellorStore, geocodingService });
+const addToShortlistHandler = createAddToShortlistHandler({ shortlistStore, sessionStore, userStore });
+const removeFromShortlistHandler = createRemoveFromShortlistHandler({ shortlistStore, sessionStore, userStore });
+const getShortlistHandler = createGetShortlistHandler({ shortlistStore, sessionStore, userStore });
+eventBus.on('CoupleCreated', (event) => {
+  if (event.type !== 'CoupleCreated') return;
+  Promise.all([
+    shortlistStore.mergeOwner(event.userIds[0], event.coupleId),
+    shortlistStore.mergeOwner(event.userIds[1], event.coupleId),
+  ]).catch(console.error);
+});
 
 export function handler(req: IncomingMessage, res: ServerResponse): void {
   const url = new URL(req.url ?? '', 'http://x');
@@ -136,6 +149,20 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   }
   if (req.method === 'POST' && path === '/api/couple/unlink') {
     unlinkHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path.startsWith('/api/shortlist/')) {
+    const id = path.slice('/api/shortlist/'.length);
+    addToShortlistHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'DELETE' && path.startsWith('/api/shortlist/')) {
+    const id = path.slice('/api/shortlist/'.length);
+    removeFromShortlistHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'GET' && path === '/api/shortlist') {
+    getShortlistHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (req.method === 'GET' && path === '/api/admin/counsellors/pending') {

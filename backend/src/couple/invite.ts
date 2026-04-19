@@ -5,6 +5,7 @@ import type { Mailer } from '../auth/mailer.ts';
 import type { CoupleStore } from './couple-store.ts';
 import { getSessionUser } from '../auth/login.ts';
 import type { SessionStore } from '../auth/session-store.ts';
+import type { EventBus } from '../events.ts';
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -13,6 +14,7 @@ export interface InviteDeps {
   coupleStore: CoupleStore;
   mailer: Mailer;
   sessionStore: SessionStore;
+  eventBus?: EventBus;
 }
 
 export type SendResult = 'ok' | 'already_coupled' | 'self_invite';
@@ -49,7 +51,7 @@ export async function sendInvite(
 export async function acceptInvite(
   rawToken: string,
   inviteeId: string,
-  { userStore, coupleStore }: { userStore: UserStore; coupleStore: CoupleStore },
+  { userStore, coupleStore, eventBus }: { userStore: UserStore; coupleStore: CoupleStore; eventBus?: EventBus },
 ): Promise<AcceptResult> {
   const invitee = await userStore.findById(inviteeId);
   if (!invitee) return 'invalid';
@@ -69,6 +71,7 @@ export async function acceptInvite(
   await userStore.updateCouple(inviteeId, coupleId, invite.inviterId);
   await coupleStore.deleteInvite(tokenHash);
 
+  eventBus?.emit({ type: 'CoupleCreated', coupleId, userIds: [invite.inviterId, inviteeId], at: new Date() });
   return 'ok';
 }
 
@@ -136,7 +139,7 @@ export function createAcceptHandler(deps: InviteDeps) {
       return;
     }
 
-    const result = await acceptInvite(token, session.userId, deps);
+    const result = await acceptInvite(token, session.userId, { ...deps, eventBus: deps.eventBus });
 
     if (result === 'ok') {
       res.writeHead(200, { 'Content-Type': 'application/json' });

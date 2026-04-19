@@ -5,7 +5,14 @@ export interface CoupleDissolved {
   at: Date;
 }
 
-export type DomainEvent = CoupleDissolved;
+export interface CoupleCreated {
+  type: 'CoupleCreated';
+  coupleId: string;
+  userIds: [string, string];
+  at: Date;
+}
+
+export type DomainEvent = CoupleDissolved | CoupleCreated;
 
 export class EventBus {
   private readonly handlers = new Map<string, ((event: DomainEvent) => void)[]>();
