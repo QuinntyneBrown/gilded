@@ -40,6 +40,6 @@ Ship endpoints for `visibility='public'`. All authenticated users can read. Only
 3. Given a public note is displayed, when rendered, then the author's display name (not email) is shown.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
