@@ -42,8 +42,16 @@ Build the always-on application chrome: a `MatToolbar` header, a `MatSidenav` na
 - Viewport < 576px: single column, hamburger to open sidenav, tap targets >= 44x44 px.
 - Viewports 576 / 768 / 992 / 1200: no horizontal scroll, no clipped content.
 
+## Verification Check
+1. **Simpler?** No unused inputs or template blocks. BreakpointObserver used directly via `inject()`.
+2. **Complete?** `[mode]` and `[opened]` bindings driven by `isHandset$`; layout fills viewport with no overflow.
+3. **No temporary code?** Confirmed.
+4. **No stubs/mocks?** Confirmed.
+5. **All tests pass?** ShellComponent spec passes in Karma (TypeScript compiles cleanly via `ng build`).
+6. **Lint + typecheck green?** Yes — `npm run lint` and `npm run typecheck` both exit 0.
+
 ## Done When
-- [ ] Acceptance tests green at all required breakpoints.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
-- [ ] Zero raw HTML buttons or custom icons in shell template.
+- [x] Acceptance tests green at all required breakpoints.
+- [x] Verification check answered.
+- [x] Two commits recorded.
+- [x] Zero raw HTML buttons or custom icons in shell template.
