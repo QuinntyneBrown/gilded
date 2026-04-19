@@ -41,6 +41,6 @@ Ship `PUT /api/counsellors/:id/rating` with body `{ stars: 1..5 }`. Idempotent: 
 3. Given a rating outside 1..5, when submitted, then the system rejects it with HTTP 400.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
