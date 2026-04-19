@@ -24,6 +24,7 @@ export interface Counsellor {
   lng?: number;
   photoFilename?: string;
   moderationState?: 'pending' | 'approved' | 'rejected';
+  reviewedBy?: string;
 }
 
 export interface CounsellorStore {
@@ -32,6 +33,8 @@ export interface CounsellorStore {
   findBySourceUrl(sourceUrl: string): Promise<Counsellor | null>;
   findDuplicate(normalizedName: string, normalizedAddress: string, phone: string, email: string): Promise<Counsellor | null>;
   findAll(): Promise<Counsellor[]>;
+  findPending(): Promise<Counsellor[]>;
+  updateModerationState(id: string, state: 'approved' | 'rejected', reviewedBy?: string): Promise<void>;
   updatePhoto(id: string, filename: string): Promise<void>;
 }
 
@@ -64,6 +67,15 @@ export class InMemoryCounsellorStore implements CounsellorStore {
 
   async findAll(): Promise<Counsellor[]> {
     return [...this.byId.values()];
+  }
+
+  async findPending(): Promise<Counsellor[]> {
+    return [...this.byId.values()].filter(c => c.source === 'user_submitted' && c.moderationState === 'pending');
+  }
+
+  async updateModerationState(id: string, state: 'approved' | 'rejected', reviewedBy?: string): Promise<void> {
+    const c = this.byId.get(id);
+    if (c) { c.moderationState = state; if (reviewedBy) c.reviewedBy = reviewedBy; }
   }
 
   async updatePhoto(id: string, filename: string): Promise<void> {

@@ -18,7 +18,7 @@ function fakeMailer(): { mailer: Mailer; sent: { email: string; token: string }[
   const sent: { email: string; token: string }[] = [];
   return {
     sent,
-    mailer: { sendVerification: (email, token) => { sent.push({ email, token }); return Promise.resolve(); }, sendReset: () => Promise.resolve(), sendInvite: () => Promise.resolve() },
+    mailer: { sendVerification: (email, token) => { sent.push({ email, token }); return Promise.resolve(); }, sendReset: () => Promise.resolve(), sendInvite: () => Promise.resolve(), sendRejection: () => Promise.resolve() },
   };
 }
 

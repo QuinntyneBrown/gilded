@@ -2,6 +2,8 @@ import { timingSafeEqual } from 'node:crypto';
 
 export type UserState = 'pending_verification' | 'active' | 'disabled';
 
+export type UserRole = 'user' | 'moderator' | 'admin';
+
 export interface User {
   id: string;
   email: string;
@@ -10,6 +12,7 @@ export interface User {
   createdAt: Date;
   spouseId?: string;
   coupleId?: string;
+  role?: UserRole;
 }
 
 export interface VerificationToken {
@@ -34,6 +37,7 @@ export interface UserStore {
   deleteResetTokensByUserId(userId: string): Promise<void>;
   updateCouple(userId: string, coupleId: string, spouseId: string): Promise<void>;
   clearCouple(userId: string): Promise<void>;
+  setRole(userId: string, role: UserRole): Promise<void>;
 }
 
 export class InMemoryUserStore implements UserStore {
@@ -113,5 +117,10 @@ export class InMemoryUserStore implements UserStore {
   async clearCouple(userId: string): Promise<void> {
     const user = this.byId.get(userId);
     if (user) { delete user.coupleId; delete user.spouseId; }
+  }
+
+  async setRole(userId: string, role: UserRole): Promise<void> {
+    const user = this.byId.get(userId);
+    if (user) user.role = role;
   }
 }

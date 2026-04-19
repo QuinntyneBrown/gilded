@@ -9,6 +9,7 @@ import { createInviteHandler, createAcceptHandler } from './couple/invite.ts';
 import { createUnlinkHandler } from './couple/unlink.ts';
 import { createGetCounsellorHandler } from './counsellor/counsellor.ts';
 import { createSubmitCounsellorHandler } from './counsellor/submit.ts';
+import { createListPendingHandler, createApproveHandler, createRejectHandler } from './counsellor/moderate.ts';
 import { createUploadPhotoHandler, createServePhotoHandler } from './counsellor/photo.ts';
 import { createSearchCounsellorsHandler } from './counsellor/search.ts';
 import { GeocodingService } from './geo/geocoding.ts';
@@ -32,6 +33,7 @@ function buildMailer(): Mailer {
     sendVerification: async (email, token) => { captureLog.push({ email, token }); },
     sendReset: async (email, token) => { captureLog.push({ email, token }); },
     sendInvite: async (email, token) => { captureLog.push({ email, token }); },
+    sendRejection: async (email, _name, reason) => { captureLog.push({ email, token: reason }); },
   };
 }
 
@@ -60,6 +62,9 @@ const acceptHandler = createAcceptHandler({ userStore, coupleStore, mailer: auth
 const unlinkHandler = createUnlinkHandler({ userStore, coupleStore, sessionStore, eventBus });
 const getCounsellorHandler = createGetCounsellorHandler({ counsellorStore });
 const submitCounsellorHandler = createSubmitCounsellorHandler({ counsellorStore, sessionStore });
+const listPendingHandler = createListPendingHandler({ counsellorStore, sessionStore, userStore, mailer: authDeps.mailer });
+const approveHandler = createApproveHandler({ counsellorStore, sessionStore, userStore, mailer: authDeps.mailer });
+const rejectHandler = createRejectHandler({ counsellorStore, sessionStore, userStore, mailer: authDeps.mailer });
 const uploadPhotoHandler = createUploadPhotoHandler({ counsellorStore });
 const servePhotoHandler = createServePhotoHandler({ counsellorStore });
 const searchCounsellorsHandler = createSearchCounsellorsHandler({ counsellorStore, geocodingService });
@@ -115,6 +120,20 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
   }
   if (req.method === 'POST' && path === '/api/couple/unlink') {
     unlinkHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'GET' && path === '/api/admin/counsellors/pending') {
+    listPendingHandler(req, res).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path.startsWith('/api/admin/counsellors/') && path.endsWith('/approve')) {
+    const id = path.slice('/api/admin/counsellors/'.length, -'/approve'.length);
+    approveHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (req.method === 'POST' && path.startsWith('/api/admin/counsellors/') && path.endsWith('/reject')) {
+    const id = path.slice('/api/admin/counsellors/'.length, -'/reject'.length);
+    rejectHandler(req, res, id).catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   if (req.method === 'POST' && path.startsWith('/api/counsellors/') && path.endsWith('/photo')) {
@@ -228,6 +247,23 @@ export function handler(req: IncomingMessage, res: ServerResponse): void {
       res.writeHead(session ? 200 : 404, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(session ?? { error: 'not found' }));
     }).catch(err => { console.error(err); res.writeHead(500); res.end(); });
+    return;
+  }
+  if (CAPTURE && req.method === 'POST' && path === '/api/dev/grant-role') {
+    (async () => {
+      let data = '';
+      await new Promise<void>((resolve, reject) => {
+        req.on('data', (c) => (data += c));
+        req.on('end', () => resolve());
+        req.on('error', reject);
+      });
+      const { email, role } = JSON.parse(data) as { email: string; role: string };
+      const user = await userStore.findByEmail(email);
+      if (!user) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'not found' })); return; }
+      await userStore.setRole(user.id, role as 'user' | 'moderator' | 'admin');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    })().catch(err => { console.error(err); res.writeHead(500); res.end(); });
     return;
   }
   res.writeHead(404);

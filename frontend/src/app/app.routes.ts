@@ -29,4 +29,8 @@ export const routes: Routes = [
     path: 'counsellors/:id',
     loadComponent: () => import('./counsellors/counsellor-profile.component').then(m => m.CounsellorProfilePageComponent),
   },
+  {
+    path: 'admin/counsellors/pending',
+    loadComponent: () => import('./admin/moderation-queue.component').then(m => m.ModerationQueueComponent),
+  },
 ];

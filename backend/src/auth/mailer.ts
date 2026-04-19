@@ -4,6 +4,7 @@ export interface Mailer {
   sendVerification(email: string, token: string): Promise<void>;
   sendReset(email: string, token: string): Promise<void>;
   sendInvite(email: string, token: string, inviterEmail: string): Promise<void>;
+  sendRejection(email: string, counsellorName: string, reason: string): Promise<void>;
 }
 
 export class NodemailerMailer implements Mailer {
@@ -43,6 +44,15 @@ export class NodemailerMailer implements Mailer {
       to: email,
       subject: `${inviterEmail} invited you to Gilded`,
       text: `You have been invited to join Gilded by ${inviterEmail}.\n\nAccept: ${link}\n\nExpires in 7 days.`,
+    });
+  }
+
+  async sendRejection(email: string, counsellorName: string, reason: string): Promise<void> {
+    await this.transport.sendMail({
+      from: process.env['SMTP_FROM'] ?? 'noreply@gilded.app',
+      to: email,
+      subject: `Your counsellor submission for ${counsellorName} was rejected`,
+      text: `Your counsellor submission for ${counsellorName} was not approved.\n\nReason: ${reason}`,
     });
   }
 }
