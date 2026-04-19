@@ -45,6 +45,6 @@ Ship the moderator-facing endpoints and a single admin list UI. Pending rows are
 2. Given a moderator rejects a submission, when rejected, then the submitter is notified with a reason.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
