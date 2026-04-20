@@ -37,6 +37,6 @@ Expose `GET /metrics` (Prometheus text format or equivalent) with request rate, 
 1. Given the system is running, when metrics are scraped, then request rate, error rate, p50/p95/p99 latency, and auth failure rate are available.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

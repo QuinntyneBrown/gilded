@@ -44,6 +44,6 @@ Ship a dedicated IDOR-focused Playwright suite exercising every note endpoint wi
 1. Given automated IDOR tests against notes endpoints, when run, then all probes return 403/409 (per test expectation) with no leakage of foreign note content.
 
 ## Done When
-- [ ] All IDOR probes green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] All IDOR probes green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

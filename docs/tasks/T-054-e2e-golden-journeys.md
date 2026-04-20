@@ -46,6 +46,6 @@ Ship the "golden path" journey specs that chain POMs to prove the full value loo
 3. Given the review journey spec, when run, then rating + review + comment + delete are all visible in the UI and reflected in the API.
 
 ## Done When
-- [ ] All three journey specs green on Chromium, WebKit, Firefox at 360 and 1280 viewports.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] All three journey specs green on Chromium, WebKit, Firefox at 360 and 1280 viewports.
+- [x] Verification check answered.
+- [x] Two commits recorded.

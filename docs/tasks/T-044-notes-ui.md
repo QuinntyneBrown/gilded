@@ -51,6 +51,6 @@ Ship `/notes`: three `MatTab`s — Private, Spouse, Public. Each tab lists its n
 - All controls use Material components.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

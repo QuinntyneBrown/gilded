@@ -38,6 +38,6 @@ Apply a generalised sliding-window per-IP limiter (10 req/min) to signup, login,
 1. Given login, signup, password reset, or spouse-invite endpoints are called more than 10 times per IP per minute, when exceeded, then subsequent calls return HTTP 429.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

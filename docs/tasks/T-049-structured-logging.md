@@ -38,6 +38,6 @@ Every request emits one structured log line `{ requestId, userId?, route, method
 2. Given any log entry, when emitted, then note content, passwords, tokens, and full email addresses are never included.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

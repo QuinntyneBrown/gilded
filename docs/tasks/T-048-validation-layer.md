@@ -41,6 +41,6 @@ Adopt a single schema validation library (e.g., Zod) and apply a schema to every
 3. Given any database query, when executed, then it uses parameterised statements.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

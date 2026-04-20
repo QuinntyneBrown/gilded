@@ -36,6 +36,6 @@ Cap a single authenticated user to 20 review/comment/public-note creations per h
 1. Given a single user creates more than 20 reviews/comments/public notes per hour, when exceeded, then further creations return 429.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

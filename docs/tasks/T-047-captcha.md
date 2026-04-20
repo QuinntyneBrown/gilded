@@ -37,6 +37,6 @@ Integrate a CAPTCHA (e.g., Cloudflare Turnstile or Google reCAPTCHA v3) so that 
 1. Given the signup or review-creation endpoint is called without a valid CAPTCHA token, when invoked, then the request is rejected.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
