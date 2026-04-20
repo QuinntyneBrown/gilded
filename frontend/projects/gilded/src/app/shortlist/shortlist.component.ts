@@ -10,7 +10,7 @@ import { MatTableModule } from '@angular/material/table';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
-import { CounsellorAvatarComponent } from '../counsellors/counsellor-avatar.component';
+import { CounsellorAvatarComponent } from 'components';
 
 interface ShortlistEntry {
   counsellorId: string;

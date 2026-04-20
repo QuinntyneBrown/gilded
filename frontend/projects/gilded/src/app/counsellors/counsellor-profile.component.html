@@ -16,7 +16,7 @@
           @if (c.photoUrl) {
             <img [src]="c.photoUrl" [alt]="c.name + ' photo'" class="profile-photo" />
           } @else {
-            <app-counsellor-avatar [name]="c.name" />
+            <lib-counsellor-avatar [name]="c.name" />
           }
         </div>
         <div class="profile-heading">

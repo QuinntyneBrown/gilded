@@ -19,7 +19,7 @@
             @if (c.photoUrl) {
               <img [src]="c.photoUrl" [alt]="c.name" class="table-avatar" />
             } @else {
-              <app-counsellor-avatar [name]="c.name" [size]="40" />
+              <lib-counsellor-avatar [name]="c.name" [size]="40" />
             }
           </td>
         </ng-container>
@@ -88,7 +88,7 @@
                 @if (c.photoUrl) {
                   <img [src]="c.photoUrl" [alt]="c.name" class="card-avatar" />
                 } @else {
-                  <app-counsellor-avatar [name]="c.name" [size]="40" />
+                  <lib-counsellor-avatar [name]="c.name" [size]="40" />
                 }
               </div>
               <mat-card-title>

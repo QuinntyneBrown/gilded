@@ -14,7 +14,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { CounsellorAvatarComponent } from './counsellor-avatar.component';
+import { CounsellorAvatarComponent } from 'components';
 
 interface CounsellorProfile {
   id: string;

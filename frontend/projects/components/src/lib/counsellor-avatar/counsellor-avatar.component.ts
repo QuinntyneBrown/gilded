@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 const PALETTE = ['#1565C0', '#2E7D32', '#6A1B9A', '#AD1457', '#00695C', '#E65100', '#4527A0', '#283593'];
 
 @Component({
-  selector: 'app-counsellor-avatar',
+  selector: 'lib-counsellor-avatar',
   standalone: true,
   imports: [CommonModule],
   template: `
