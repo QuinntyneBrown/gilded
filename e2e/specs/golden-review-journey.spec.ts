@@ -37,9 +37,9 @@ test('rate, review, comment, aggregate, and delete', async ({ page }) => {
 
   // Reload to verify aggregate persisted
   await page.reload();
-  await expect(page.locator('text=4')).toBeVisible();
+  await expect(page.getByTestId('rating-display')).toContainText('4');
 
   // Delete the review and check placeholder
   await profile.deleteOwnReviewAt(0);
-  await expect(page.getByText(/deleted/i).or(page.getByText(/no reviews yet/i))).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('[data-review]').first()).toContainText('[removed by author]');
 });

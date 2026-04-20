@@ -237,6 +237,11 @@ export class CounsellorProfilePageComponent implements OnInit, AfterViewInit {
   }
 
   shortlist(): void {
-    // T-035
+    const id = this.counsellor()?.id;
+    if (!id) return;
+    this.http.post(`/api/shortlist/${id}`, {}).subscribe({
+      next: () => void 0,
+      error: () => void 0,
+    });
   }
 }

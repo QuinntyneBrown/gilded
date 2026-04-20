@@ -4,7 +4,7 @@
 
 import { expect, test } from '@playwright/test';
 
-const SIGNUP = 'http://127.0.0.1:3000/api/auth/signup';
+const SIGNUP = `${process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121'}/api/auth/signup`;
 
 test.describe('POST /api/auth/signup', () => {
   test('valid signup returns 200 with generic message', async ({ request }) => {

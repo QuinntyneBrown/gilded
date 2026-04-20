@@ -58,7 +58,9 @@
         }
       </mat-card-content>
       <mat-card-actions>
-        <button mat-button (click)="shortlistAt($index)">Shortlist</button>
+        <button mat-button (click)="shortlistAt($index)" [disabled]="shortlistedIds()[result.id]">
+          {{ shortlistedIds()[result.id] ? 'Shortlisted' : 'Shortlist' }}
+        </button>
         <button mat-button (click)="openProfileAt($index)">View Profile</button>
       </mat-card-actions>
     </mat-card>

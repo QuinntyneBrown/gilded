@@ -5,7 +5,7 @@
 import { test } from '@playwright/test';
 import { SpouseSettingsPage } from '../pages/spouse-settings.page';
 
-const BASE = 'http://127.0.0.1:3000';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
 const SIGNUP = `${BASE}/api/auth/signup`;
 const VERIFY = `${BASE}/api/auth/verify`;
 const LOGIN = `${BASE}/api/auth/login`;

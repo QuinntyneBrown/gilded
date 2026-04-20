@@ -5,7 +5,7 @@
 import { expect, test } from '@playwright/test';
 import { ShortlistPage } from '../pages/shortlist.page';
 
-const BASE = 'http://127.0.0.1:3000';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
 
 async function setup(browserContext: import('@playwright/test').BrowserContext, ts: string) {
   const request = browserContext.request;

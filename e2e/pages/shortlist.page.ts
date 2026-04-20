@@ -15,7 +15,9 @@ export class ShortlistPage extends BasePage {
   }
 
   async chooseAt(index: number): Promise<void> {
-    await this.page.locator('[data-shortlist-item]').nth(index).getByRole('button', { name: /choose/i }).click();
+    const item = this.page.locator('[data-shortlist-item]').nth(index);
+    await item.getByRole('button', { name: /choose/i }).click();
+    await item.locator('[data-chosen]').waitFor({ timeout: 10_000 });
   }
 
   async removeAt(index: number): Promise<void> {

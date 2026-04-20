@@ -5,7 +5,8 @@
 import { expect, test } from '@playwright/test';
 import { CounsellorProfilePage } from '../pages/counsellor-profile.page';
 
-const SEED = 'http://127.0.0.1:3000/api/dev/seed/counsellor';
+const API_BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
+const SEED = `${API_BASE}/api/dev/seed/counsellor`;
 
 const COUNSELLOR = {
   name: 'Dr. Profile Test',

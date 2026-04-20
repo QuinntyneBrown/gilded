@@ -4,14 +4,15 @@
 
 import { expect, test } from '@playwright/test';
 
-const SIGNUP = 'http://127.0.0.1:3000/api/auth/signup';
-const VERIFY = 'http://127.0.0.1:3000/api/auth/verify';
-const LOGIN = 'http://127.0.0.1:3000/api/auth/login';
-const ME = 'http://127.0.0.1:3000/api/auth/me';
-const RESET_REQ = 'http://127.0.0.1:3000/api/auth/reset-request';
-const RESET_COMPLETE = 'http://127.0.0.1:3000/api/auth/reset-complete';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
+const SIGNUP = `${BASE}/api/auth/signup`;
+const VERIFY = `${BASE}/api/auth/verify`;
+const LOGIN = `${BASE}/api/auth/login`;
+const ME = `${BASE}/api/auth/me`;
+const RESET_REQ = `${BASE}/api/auth/reset-request`;
+const RESET_COMPLETE = `${BASE}/api/auth/reset-complete`;
 const LAST_TOKEN = (email: string) =>
-  `http://127.0.0.1:3000/api/dev/last-token?email=${encodeURIComponent(email)}`;
+  `${BASE}/api/dev/last-token?email=${encodeURIComponent(email)}`;
 
 const PASSWORD = 'ValidPass123!';
 const NEW_PASSWORD = 'NewSecure456@';

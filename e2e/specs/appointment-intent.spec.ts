@@ -5,7 +5,8 @@
 import { expect, test } from '@playwright/test';
 import { CounsellorProfilePage } from '../pages/counsellor-profile.page';
 
-const BASE = 'http://127.0.0.1:3000';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
+const APP_BASE = process.env['APP_BASE_URL'] ?? 'http://127.0.0.1:43120';
 
 async function seedCounsellor(request: import('@playwright/test').APIRequestContext, ts: string, withBooking = true) {
   const r = await request.post(`${BASE}/api/dev/seed/counsellor`, {
@@ -115,7 +116,7 @@ test.describe('Make Appointment UI', () => {
     await profile.goto(id);
     await page.getByRole('button', { name: /make appointment/i }).click();
     await page.waitForTimeout(500);
-    await page.goto('http://localhost:4200/search');
+    await page.goto(`${APP_BASE}/search`);
     await expect(page.locator('[data-appointment-banner]')).toBeVisible({ timeout: 8_000 });
   });
 });

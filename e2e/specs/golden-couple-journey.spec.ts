@@ -10,6 +10,38 @@ import { linkSpouse } from '../flows/linkSpouse';
 import { findAndChooseCounsellor } from '../flows/findAndChooseCounsellor';
 
 const PASSWORD = 'ValidPass123!';
+const API_BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
+
+async function seedMississaugaFixtures(page: import('@playwright/test').Page, ts: number): Promise<void> {
+  await page.request.post('/api/dev/seed/postal', {
+    data: { code: 'L5A4E6', lat: 43.589, lng: -79.6441 },
+  });
+
+  const fixtures = [
+    { name: `Golden Couple ${ts}-1`, lat: 43.589, lng: -79.6441 },
+    { name: `Golden Couple ${ts}-2`, lat: 43.596, lng: -79.6465 },
+    { name: `Golden Couple ${ts}-3`, lat: 43.5825, lng: -79.6389 },
+  ];
+
+  for (const [index, fixture] of fixtures.entries()) {
+    const res = await page.request.post(`${API_BASE}/api/dev/seed/counsellor`, {
+      data: {
+        name: fixture.name,
+        denomination: 'Christian (Non-denominational)',
+        credentials: ['M.Div'],
+        specialties: ['Marriage'],
+        address: `${index + 1} Golden Way, Mississauga, ON`,
+        phone: `+1-905-555-${String(ts + index).slice(-4)}`,
+        bookingLink: `https://booking.example.com/${ts}-${index}`,
+        source: 'web_research',
+        verified: true,
+        lat: fixture.lat,
+        lng: fixture.lng,
+      },
+    });
+    expect(res.ok()).toBeTruthy();
+  }
+}
 
 test('couple finds, shortlists and marks chosen counsellor', async ({ browser }) => {
   const ts = Date.now();
@@ -29,6 +61,7 @@ test('couple finds, shortlists and marks chosen counsellor', async ({ browser })
     await loginViaUI(pageB, emailB, PASSWORD);
 
     await linkSpouse(pageA, pageB, emailB);
+    await seedMississaugaFixtures(pageA, ts);
 
     const chosenId = await findAndChooseCounsellor(pageA, 'L5A4E6');
     expect(chosenId).toBeTruthy();

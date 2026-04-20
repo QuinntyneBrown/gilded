@@ -5,7 +5,7 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import { ModerationQueuePage } from '../pages/moderation-queue.page';
 
-const BASE = 'http://127.0.0.1:3000';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
 
 async function createUser(request: APIRequestContext, suffix: string): Promise<{ sid: string; email: string }> {
   const email = `mod-user-${suffix}@example.com`;

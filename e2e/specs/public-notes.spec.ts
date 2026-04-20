@@ -4,7 +4,7 @@
 
 import { expect, test, type APIRequestContext } from '@playwright/test';
 
-const BASE = 'http://127.0.0.1:3000';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
 
 async function loginAs(request: APIRequestContext, suffix: string): Promise<string> {
   const email = `pubnote-${suffix}@example.com`;

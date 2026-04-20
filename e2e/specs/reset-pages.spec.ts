@@ -6,11 +6,12 @@ import { test } from '@playwright/test';
 import { ResetRequestPage } from '../pages/reset-request.page';
 import { ResetCompletePage } from '../pages/reset-complete.page';
 
-const SIGNUP = 'http://127.0.0.1:3000/api/auth/signup';
-const VERIFY = 'http://127.0.0.1:3000/api/auth/verify';
-const RESET_REQ = 'http://127.0.0.1:3000/api/auth/reset-request';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
+const SIGNUP = `${BASE}/api/auth/signup`;
+const VERIFY = `${BASE}/api/auth/verify`;
+const RESET_REQ = `${BASE}/api/auth/reset-request`;
 const LAST_TOKEN = (email: string) =>
-  `http://127.0.0.1:3000/api/dev/last-token?email=${encodeURIComponent(email)}`;
+  `${BASE}/api/dev/last-token?email=${encodeURIComponent(email)}`;
 
 const PASSWORD = 'ValidPass123!';
 const NEW_PASSWORD = 'NewSecure456@';

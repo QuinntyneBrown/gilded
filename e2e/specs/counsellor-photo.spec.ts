@@ -4,7 +4,7 @@
 
 import { expect, test } from '@playwright/test';
 
-const BASE = 'http://127.0.0.1:3000';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
 const SEED = `${BASE}/api/dev/seed/counsellor`;
 const PHOTO_URL = (id: string) => `${BASE}/api/counsellors/${id}/photo`;
 const PROFILE_URL = (id: string) => `${BASE}/api/counsellors/${id}`;

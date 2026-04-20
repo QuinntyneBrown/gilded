@@ -50,7 +50,13 @@ export class SearchPage extends BasePage {
   }
 
   async shortlistAt(index: number): Promise<void> {
-    await this.page.locator('mat-card.result-card').nth(index).getByRole('button', { name: /shortlist/i }).click();
+    await Promise.all([
+      this.page.waitForResponse(
+        response => response.url().includes('/api/shortlist/') && [200, 201].includes(response.status()),
+        { timeout: 10_000 },
+      ),
+      this.page.locator('mat-card.result-card').nth(index).getByRole('button', { name: /shortlist/i }).click(),
+    ]);
   }
 
   async gotoPage(n: number): Promise<void> {

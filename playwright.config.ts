@@ -1,27 +1,35 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const port = process.env['APP_PORT'] ?? '4200';
-const baseURL = `http://localhost:${port}`;
+const appPort = process.env['APP_PORT'] ?? '43120';
+const apiPort = process.env['API_PORT'] ?? '43121';
+const appBaseURL = process.env['APP_BASE_URL'] ?? `http://localhost:${appPort}`;
+const apiBaseURL = process.env['API_BASE_URL'] ?? `http://localhost:${apiPort}`;
+
+process.env['APP_PORT'] = appPort;
+process.env['API_PORT'] = apiPort;
+process.env['APP_BASE_URL'] = appBaseURL;
+process.env['API_BASE_URL'] = apiBaseURL;
 
 export default defineConfig({
   testDir: './e2e/specs',
   timeout: 30_000,
   webServer: [
     {
-      command: 'npm run dev:backend',
-      url: 'http://127.0.0.1:3000/health',
-      reuseExistingServer: !process.env['CI'],
+      command: 'npm run dev --workspace backend',
+      url: `${apiBaseURL}/health`,
+      reuseExistingServer: false,
       timeout: 120_000,
-      env: { CAPTURE_EMAILS: '1', CAPTCHA_DISABLED: '1' },
+      env: { CAPTURE_EMAILS: '1', CAPTCHA_DISABLED: '1', PORT: apiPort },
     },
     {
-      command: `npm run dev:frontend -- --port ${port}`,
-      url: baseURL,
-      reuseExistingServer: !process.env['CI'],
+      command: `npm run dev --workspace frontend -- --port ${appPort}`,
+      url: appBaseURL,
+      reuseExistingServer: false,
       timeout: 120_000,
+      env: { API_PORT: apiPort },
     },
   ],
-  use: { baseURL },
+  use: { baseURL: appBaseURL },
   projects: [
     {
       name: 'perf-budgets',

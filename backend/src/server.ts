@@ -29,7 +29,7 @@ import { InMemoryReviewStore } from './counsellor/review-store.ts';
 import { InMemoryCommentStore } from './counsellor/comment-store.ts';
 import { createUploadPhotoHandler, createServePhotoHandler } from './counsellor/photo.ts';
 import { createSearchCounsellorsHandler } from './counsellor/search.ts';
-import { GeocodingService } from './geo/geocoding.ts';
+import { GeocodingService, HttpGeocoderProvider, StaticGeocoderProvider } from './geo/geocoding.ts';
 import { InMemoryPostalCodeCache } from './geo/postal-cache.ts';
 import { InMemoryUserStore } from './auth/user-store.ts';
 import { InMemorySessionStore } from './auth/session-store.ts';
@@ -73,9 +73,10 @@ const notificationStore = new InMemoryNotificationStore();
 const appointmentStore = new InMemoryAppointmentStore();
 const noteStore = new InMemoryNoteStore();
 const postalCache = new InMemoryPostalCodeCache();
-const geocodingService = new GeocodingService(postalCache, {
-  geocode: async () => { throw new Error('GEOCODING_API_KEY not configured'); },
-});
+const geocodingService = new GeocodingService(
+  postalCache,
+  process.env['GEOCODING_API_KEY'] ? new HttpGeocoderProvider() : new StaticGeocoderProvider(),
+);
 const eventBus = new EventBus();
 const authDeps = { userStore, mailer: buildMailer() };
 const sessionDeps = { userStore, sessionStore };
@@ -131,9 +132,9 @@ const getCurrentIntentHandler = createGetCurrentIntentHandler({ appointmentStore
 const updateIntentStatusHandler = createUpdateIntentStatusHandler({ appointmentStore, sessionStore });
 const chosenCounsellorHandler = createChosenCounsellorHandler({ coupleStore, counsellorStore, notificationStore, sessionStore, userStore, mailer: authDeps.mailer });
 const getNotificationsHandler = createGetNotificationsHandler({ notificationStore, sessionStore });
-const addToShortlistHandler = createAddToShortlistHandler({ shortlistStore, sessionStore, userStore });
-const removeFromShortlistHandler = createRemoveFromShortlistHandler({ shortlistStore, sessionStore, userStore });
-const getShortlistHandler = createGetShortlistHandler({ shortlistStore, sessionStore, userStore });
+const addToShortlistHandler = createAddToShortlistHandler({ shortlistStore, sessionStore, userStore, coupleStore });
+const removeFromShortlistHandler = createRemoveFromShortlistHandler({ shortlistStore, sessionStore, userStore, coupleStore });
+const getShortlistHandler = createGetShortlistHandler({ shortlistStore, sessionStore, userStore, coupleStore });
 eventBus.on('CoupleCreated', (event) => {
   if (event.type !== 'CoupleCreated') return;
   Promise.all([
@@ -421,6 +422,18 @@ async function routeRequest(req: IncomingMessage, res: ServerResponse): Promise<
         req.on('error', reject);
       });
       const body = JSON.parse(data) as Record<string, unknown>;
+      const postal = typeof body['postal'] === 'string' ? body['postal'] : undefined;
+      let lat = typeof body['lat'] === 'number' ? body['lat'] : undefined;
+      let lng = typeof body['lng'] === 'number' ? body['lng'] : undefined;
+      if ((lat === undefined || lng === undefined) && postal) {
+        try {
+          const coords = await geocodingService.geocode(postal);
+          lat ??= coords.lat;
+          lng ??= coords.lng;
+        } catch {
+          // Leave lat/lng unset for tests that do not depend on proximity search.
+        }
+      }
       const incomingSourceUrl = body['sourceUrl'] as string | undefined;
       if (incomingSourceUrl) {
         const existing = await counsellorStore.findBySourceUrl(incomingSourceUrl);
@@ -451,6 +464,8 @@ async function routeRequest(req: IncomingMessage, res: ServerResponse): Promise<
         photoUrl: body['photoUrl'] as string | undefined,
         rating: body['rating'] as number | undefined,
         reviewCount: Number(body['reviewCount'] ?? 0),
+        lat,
+        lng,
       };
       await counsellorStore.create(counsellor);
       res.writeHead(201, { 'Content-Type': 'application/json' });

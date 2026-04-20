@@ -57,6 +57,7 @@ export class SearchPageComponent implements OnInit {
   readonly page = signal(1);
   readonly loading = signal(false);
   readonly submitted = signal(false);
+  readonly shortlistedIds = signal<Record<string, boolean>>({});
 
   readonly PAGE_SIZE = 20;
   readonly radiusOptions = [10, 25, 50, 100];
@@ -96,8 +97,14 @@ export class SearchPageComponent implements OnInit {
   }
 
   shortlistAt(index: number): void {
-    void index;
-    // T-035
+    const counsellor = this.results()[index];
+    if (!counsellor) return;
+    this.http.post(`/api/shortlist/${counsellor.id}`, {}).subscribe({
+      next: () => {
+        this.shortlistedIds.update(ids => ({ ...ids, [counsellor.id]: true }));
+      },
+      error: () => void 0,
+    });
   }
 
   private fetchResults(postal: string, radiusKm: number, page: number): void {

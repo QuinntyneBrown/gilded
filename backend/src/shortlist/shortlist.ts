@@ -2,11 +2,13 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { ShortlistStore } from './shortlist-store.ts';
 import type { SessionStore } from '../auth/session-store.ts';
 import type { UserStore } from '../auth/user-store.ts';
+import type { CoupleStore } from '../couple/couple-store.ts';
 
 interface ShortlistDeps {
   shortlistStore: ShortlistStore;
   sessionStore: SessionStore;
   userStore: UserStore;
+  coupleStore: CoupleStore;
 }
 
 function parseCookies(header: string): Record<string, string> {
@@ -55,7 +57,7 @@ export function createRemoveFromShortlistHandler({ shortlistStore, sessionStore,
   };
 }
 
-export function createGetShortlistHandler({ shortlistStore, sessionStore, userStore }: ShortlistDeps) {
+export function createGetShortlistHandler({ shortlistStore, sessionStore, userStore, coupleStore }: ShortlistDeps) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     const session = await requireSession(req, sessionStore);
     if (!session) {
@@ -65,7 +67,16 @@ export function createGetShortlistHandler({ shortlistStore, sessionStore, userSt
     }
     const key = await ownerKey(session.userId, userStore);
     const items = await shortlistStore.findByOwner(key);
+    const user = await userStore.findById(session.userId);
+    const chosenCounsellorId = user?.coupleId
+      ? (await coupleStore.findById(user.coupleId))?.chosenCounsellorId
+      : undefined;
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(items.map(i => ({ counsellorId: i.counsellorId, addedAt: i.addedAt.toISOString(), addedBy: i.addedBy }))));
+    res.end(JSON.stringify(items.map(i => ({
+      counsellorId: i.counsellorId,
+      addedAt: i.addedAt.toISOString(),
+      addedBy: i.addedBy,
+      chosen: i.counsellorId === chosenCounsellorId,
+    }))));
   };
 }

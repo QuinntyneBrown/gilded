@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -15,6 +15,7 @@ import { CounsellorAvatarComponent } from '../counsellors/counsellor-avatar.comp
 interface ShortlistEntry {
   counsellorId: string;
   addedAt: string;
+  chosen?: boolean;
 }
 
 interface CounsellorSummary {
@@ -72,7 +73,7 @@ export class ShortlistPageComponent implements OnInit {
         entries.forEach((entry, idx) => {
           this.http.get<CounsellorSummary>(`/api/counsellors/${entry.counsellorId}`).subscribe({
             next: (c) => {
-              results[idx] = c;
+              results[idx] = { ...c, chosen: entry.chosen };
               if (--remaining === 0) { this.counsellors.set(results.filter(Boolean)); this.loading.set(false); }
             },
             error: () => { if (--remaining === 0) { this.counsellors.set(results.filter(Boolean)); this.loading.set(false); } },
@@ -84,7 +85,14 @@ export class ShortlistPageComponent implements OnInit {
   }
 
   choose(id: string): void {
-    this.counsellors.update(cs => cs.map(c => ({ ...c, chosen: c.id === id ? !c.chosen : c.chosen })));
+    this.http.post('/api/couple/chosen', { counsellorId: id }).subscribe({
+      next: () => this.setChosen(id),
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 409) {
+          this.setChosen(id);
+        }
+      },
+    });
   }
 
   remove(id: string): void {
@@ -92,5 +100,9 @@ export class ShortlistPageComponent implements OnInit {
       next: () => this.counsellors.update(cs => cs.filter(c => c.id !== id)),
       error: () => void 0,
     });
+  }
+
+  private setChosen(id: string): void {
+    this.counsellors.update(cs => cs.map(c => ({ ...c, chosen: c.id === id })));
   }
 }

@@ -5,7 +5,7 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import { CounsellorProfilePage } from '../pages/counsellor-profile.page';
 
-const BASE = 'http://127.0.0.1:3000';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
 
 async function seedCounsellor(request: APIRequestContext, ts: string): Promise<string> {
   const r = await request.post(`${BASE}/api/dev/seed/counsellor`, {

@@ -4,11 +4,12 @@
 
 import { expect, test } from '@playwright/test';
 
-const SIGNUP = 'http://127.0.0.1:3000/api/auth/signup';
-const VERIFY = 'http://127.0.0.1:3000/api/auth/verify';
-const RESEND = 'http://127.0.0.1:3000/api/auth/resend-verification';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
+const SIGNUP = `${BASE}/api/auth/signup`;
+const VERIFY = `${BASE}/api/auth/verify`;
+const RESEND = `${BASE}/api/auth/resend-verification`;
 const LAST_TOKEN = (email: string) =>
-  `http://127.0.0.1:3000/api/dev/last-token?email=${encodeURIComponent(email)}`;
+  `${BASE}/api/dev/last-token?email=${encodeURIComponent(email)}`;
 
 async function signupAndGetToken(
   request: Parameters<Parameters<typeof test>[1]>[0]['request'],

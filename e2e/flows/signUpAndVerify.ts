@@ -12,7 +12,10 @@ export async function signUpAndVerify(page: Page, email: string, password: strin
 
   const res = await page.request.get(`/api/dev/last-token?email=${encodeURIComponent(email)}`);
   const { token } = await res.json() as { token: string };
-  await page.goto(`/verify?token=${token}`);
+  const verifyRes = await page.request.get(`/api/auth/verify?token=${token}`);
+  if (!verifyRes.ok()) {
+    throw new Error(`Verification failed with status ${verifyRes.status()}`);
+  }
 }
 
 export async function loginViaUI(page: Page, email: string, password: string): Promise<void> {

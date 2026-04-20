@@ -4,14 +4,15 @@
 
 import { expect, test } from '@playwright/test';
 
-const SIGNUP = 'http://127.0.0.1:3000/api/auth/signup';
-const VERIFY = 'http://127.0.0.1:3000/api/auth/verify';
-const LOGIN = 'http://127.0.0.1:3000/api/auth/login';
-const ME = 'http://127.0.0.1:3000/api/auth/me';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
+const SIGNUP = `${BASE}/api/auth/signup`;
+const VERIFY = `${BASE}/api/auth/verify`;
+const LOGIN = `${BASE}/api/auth/login`;
+const ME = `${BASE}/api/auth/me`;
 const LAST_TOKEN = (email: string) =>
-  `http://127.0.0.1:3000/api/dev/last-token?email=${encodeURIComponent(email)}`;
+  `${BASE}/api/dev/last-token?email=${encodeURIComponent(email)}`;
 const SESSION_INFO = (sid: string) =>
-  `http://127.0.0.1:3000/api/dev/session?sid=${encodeURIComponent(sid)}`;
+  `${BASE}/api/dev/session?sid=${encodeURIComponent(sid)}`;
 
 const PASSWORD = 'ValidPass123!';
 

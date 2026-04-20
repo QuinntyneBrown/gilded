@@ -5,7 +5,7 @@
 import { expect, test } from '@playwright/test';
 import { AddCounsellorPage } from '../pages/add-counsellor.page';
 
-const BASE = 'http://127.0.0.1:3000';
+const BASE = process.env['API_BASE_URL'] ?? 'http://127.0.0.1:43121';
 const SEED = `${BASE}/api/dev/seed/counsellor`;
 
 const VALID_INPUT = {

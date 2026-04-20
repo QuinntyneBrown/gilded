@@ -57,3 +57,20 @@ export class HttpGeocoderProvider implements GeocoderProvider {
     return data.results[0].geometry.location;
   }
 }
+
+const STATIC_LOOKUPS: Record<string, { lat: number; lng: number }> = {
+  L5A4E6: { lat: 43.589, lng: -79.6441 },
+  K1A0A1: { lat: 45.4215, lng: -75.6972 },
+  M5H1J8: { lat: 43.6505, lng: -79.3841 },
+  '90210': { lat: 34.0901, lng: -118.4065 },
+};
+
+export class StaticGeocoderProvider implements GeocoderProvider {
+  async geocode(normalizedCode: string): Promise<{ lat: number; lng: number }> {
+    const match = STATIC_LOOKUPS[normalizedCode];
+    if (!match) {
+      throw new Error(`No static geocode available for ${normalizedCode}`);
+    }
+    return match;
+  }
+}
