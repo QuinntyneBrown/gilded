@@ -1,0 +1,13 @@
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8102: The left side of this nullish coalescing operation does not include 'null' or 'undefined' in its type, therefore the '??' operator can be safely removed.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/counsellors/counsellor-profile.component.html:231:29:
+[37m      231 │                     [value]="[32mcommentBodies()[review.id] ?? ''[37m"
+          ╵                              [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of component CounsellorProfilePageComponent.
+
+    src/app/counsellors/counsellor-profile.component.ts:88:15:
+[37m      88 │   templateUrl: [32m'./counsellor-profile.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

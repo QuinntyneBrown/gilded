@@ -6,39 +6,34 @@
 Gilded is an open source web application for Christian couples to discover counsellors, evaluate options together, and manage their journey with private and shared tooling. The repository is built requirements-first: product expectations live in [docs/specs](./docs/specs), implementation slices live in [docs/tasks](./docs/tasks), and every feature is expected to ship with automated acceptance coverage.
 
 > [!IMPORTANT]
-> Gilded is in active early-stage development. The current codebase includes foundation work, authentication flows, password reset, and spouse invite/unlink behavior. Counsellor discovery, notes, reviews, shortlist workflows, and production persistence are still in progress.
+> Gilded is code complete against the current requirements set in [docs/specs/L1.md](./docs/specs/L1.md) and [docs/specs/L2.md](./docs/specs/L2.md). The repository includes the full planned feature set, acceptance coverage, production build scripts, and Azure deployment packaging. The main remaining architectural gap is durable persistence: core domain data still lives in memory unless a real datastore is introduced.
 
 ## Highlights
 
 - Angular 20 frontend with standalone components and Angular Material-only UI enforcement
-- TypeScript backend with explicit HTTP handlers for auth and couple workflows
-- Node test runner plus Playwright end-to-end coverage
-- CI pipeline for typechecking, linting, backend tests, UI lint rules, and browser tests
-- Requirements, acceptance criteria, and delivery plan tracked in the repository
+- TypeScript backend covering auth, couples, counsellor discovery, moderation, shortlist, appointment intent, notes, account deletion, metrics, and structured logging
+- Node test runner plus Playwright acceptance coverage for both UI flows and API-level behavior
+- CI pipeline for typechecking, linting, backend tests, UI lint rules, accessibility checks, performance budgets, and browser tests
+- Requirements, acceptance criteria, and implementation history tracked in the repository
 
-## Current Scope
+## Feature Set
 
-Implemented today:
+Implemented in the current codebase:
 
-- account signup with email verification
-- login, logout, session lookup, and login rate limiting
-- password reset request and completion flows
-- spouse invite, accept, and unlink flows
-- Angular pages for signup, login, and password reset
-
-Planned next:
-
-- counsellor ingestion, search, and profile experiences
-- ratings, reviews, and moderation
-- shortlist and appointment-intent workflows
-- private, spouse-shared, and public notes
-- observability, performance budgets, and account deletion
+- account signup with email verification, secure login/logout, password reset, session lookup, and account deletion
+- couple invite, accept, unlink, shortlist merge, chosen-counsellor notifications, and appointment-intent tracking
+- counsellor seeding, ingestion, manual submission, moderation, proximity search, profile pages, and photo upload
+- ratings, reviews, comments, moderation rules, and reviewer abuse controls
+- private, spouse-shared, and public notes with encryption-at-rest and IDOR coverage
+- responsive Angular Material UI for auth, search, profile, shortlist, notes, moderation, and spouse-management flows
+- structured request logging, Prometheus-style metrics, accessibility checks, and performance-budget coverage
 
 Current limitations:
 
 - backend data is stored in memory and resets on restart
+- uploaded counsellor photos use local filesystem storage unless `PHOTO_DIR` is configured
 - SMTP must be configured for real email delivery unless `CAPTURE_EMAILS=1` is enabled
-- some routes linked from the app shell are still placeholders on the roadmap
+- geocoding, CAPTCHA verification, and protected metrics require environment-specific configuration to operate beyond local defaults
 
 ## Repository Layout
 
@@ -85,6 +80,7 @@ The Angular dev server proxies `/api` requests to the backend via [frontend/prox
 | --- | --- | --- |
 | `APP_URL` | No | Base URL used in email links. Defaults to `http://localhost:4200`. |
 | `PORT` | No | HTTP port for the backend. Defaults to `3000`, but Azure App Service injects its own value. |
+| `CLIENT_DIST_DIR` | No | Overrides the frontend build directory the backend serves in production. |
 | `PHOTO_DIR` | No | Directory used for uploaded counsellor photos. Defaults to the OS temp directory. |
 | `NOTE_MASTER_KEY` | No | 64-character key used for note encryption. A development fallback is used when unset. |
 | `SMTP_HOST` | No | SMTP host for outbound email delivery. |
@@ -93,6 +89,9 @@ The Angular dev server proxies `/api` requests to the backend via [frontend/prox
 | `SMTP_PASS` | No | SMTP password. |
 | `SMTP_FROM` | No | From address for auth and invite emails. Defaults to `noreply@gilded.app`. |
 | `GEOCODING_API_KEY` | No | Enables postal-code geocoding for counsellor distance search. |
+| `TURNSTILE_SECRET_KEY` | No | Enables server-side Cloudflare Turnstile verification for signup and review creation. |
+| `CAPTCHA_DISABLED` | No | Set to `1` to bypass CAPTCHA checks even when a Turnstile secret is present. |
+| `METRICS_TOKEN` | No | Optional token required to access `GET /metrics`. |
 | `CAPTURE_EMAILS` | No | Set to `1` to capture tokens in memory and expose dev-only helper endpoints. |
 
 When `CAPTURE_EMAILS=1` is enabled, local development and E2E flows can inspect:
@@ -106,9 +105,13 @@ When `CAPTURE_EMAILS=1` is enabled, local development and E2E flows can inspect:
 
 | Command | Description |
 | --- | --- |
+| `npm run seed:counsellors` | Seed counsellors from the bundled Mississauga source file. |
+| `npm run ingest:counsellors` | Run the ingestion script against an external counsellor source. |
 | `npm run dev` | Run frontend and backend in watch mode. |
 | `npm run build` | Build the Angular frontend. |
+| `npm run build:frontend` | Build the Angular frontend explicitly. |
 | `npm run build:backend` | Compile the backend into `backend/dist` for production deployment. |
+| `npm run package:azure` | Assemble the Azure App Service artifact in `.artifacts/azure-webapp`. |
 | `npm run build:azure` | Build the frontend and backend, then assemble the Azure App Service artifact in `.artifacts/azure-webapp`. |
 | `npm run typecheck` | Run frontend and backend type checks. |
 | `npm run lint` | Run Angular lint plus backend/E2E ESLint. |
@@ -116,18 +119,20 @@ When `CAPTURE_EMAILS=1` is enabled, local development and E2E flows can inspect:
 | `npm test` | Run backend tests with the Node test runner. |
 | `npm run test:lint` | Run lint-enforcement tests. |
 | `npm run e2e` | Run Playwright end-to-end tests. |
+| `npm run e2e:perf` | Run the Playwright performance-budget project. |
 | `npm run e2e:ui` | Open Playwright UI mode. |
 | `npm run e2e:debug` | Run Playwright in debug mode. |
+| `npm run perf:load` | Run the repository load-test script. |
 
 ## Development Model
 
-Gilded is developed in small, vertically sliced tasks. Each task traces back to one or more L2 requirements and follows a red-green-verify loop:
+Gilded was built in small, vertically sliced tasks. Each task traces back to one or more L2 requirements and follows a red-green-verify loop:
 
 1. write failing acceptance coverage first
 2. implement the smallest change that satisfies the requirement
 3. review the diff and simplify before moving on
 
-For planned work, use the task files in [docs/tasks](./docs/tasks) as the source of truth. The expected task commit cadence is documented in [docs/tasks/README.md](./docs/tasks/README.md).
+The task files in [docs/tasks](./docs/tasks) remain the source of truth for requirement traceability and delivery history. Future changes should preserve the same red-green-verify cadence documented in [docs/tasks/README.md](./docs/tasks/README.md).
 
 ## Documentation
 
