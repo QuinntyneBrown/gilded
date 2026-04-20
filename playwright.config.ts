@@ -23,6 +23,11 @@ export default defineConfig({
   ],
   use: { baseURL },
   projects: [
+    {
+      name: 'perf-budgets',
+      use: { ...devices['Moto G4'] },
+      testMatch: '**/perf/**/*.spec.ts',
+    },
     { name: 'chromium-360', use: { ...devices['Desktop Chrome'], viewport: { width: 360, height: 780 } } },
     { name: 'chromium-768', use: { ...devices['Desktop Chrome'], viewport: { width: 768, height: 1024 } } },
     { name: 'chromium-1280', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },

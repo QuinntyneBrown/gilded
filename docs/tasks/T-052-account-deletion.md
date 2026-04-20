@@ -41,6 +41,6 @@ Let a user request deletion and have their data removed within 30 days per the s
 3. Given deletion completes, when audited, then no PII belonging to the deleted user remains in primary stores.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.
