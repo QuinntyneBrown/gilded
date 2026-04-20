@@ -29,10 +29,16 @@ $_dark: mat.define-theme((
 ));
 
 :root {
+  @include mat.system-level-colors($_light);
+  @include mat.system-level-typography($_light);
+  @include mat.system-level-elevation($_light);
+  @include mat.system-level-shape($_light);
+  @include mat.system-level-state($_light);
   @include mat.all-component-themes($_light);
   @include mat.typography-hierarchy($_light);
 }
 
 :root[data-theme='dark'] {
+  @include mat.system-level-colors($_dark);
   @include mat.all-component-colors($_dark);
 }
