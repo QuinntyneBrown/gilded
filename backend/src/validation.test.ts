@@ -149,7 +149,7 @@ test('no .raw( SQL patterns in backend src', () => {
 });
 
 test('no innerHTML= bindings in frontend src', () => {
-  const frontendSrc = fileURLToPath(new URL('../../../frontend/src', import.meta.url));
+  const frontendSrc = fileURLToPath(new URL('../../../frontend/projects/gilded/src', import.meta.url));
   try {
     const hits = grepDir(frontendSrc, ['ts', 'html'], /innerHTML\s*=/);
     assert.deepEqual(hits, [], `Found innerHTML= in: ${hits.join(', ')}`);

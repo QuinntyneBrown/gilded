@@ -6,7 +6,7 @@
     "dev": "ng serve",
     "build": "ng build",
     "lint": "ng lint",
-    "lint:ui": "npm run lint && stylelint \"src/**/*.scss\" --config .stylelintrc.json",
+    "lint:ui": "npm run lint && stylelint \"projects/gilded/src/**/*.scss\" --config projects/gilded/.stylelintrc.json",
     "typecheck": "ng build"
   },
   "dependencies": {

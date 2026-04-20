@@ -44,7 +44,7 @@ function auditTemplate(content: string, file: string): string[] {
 }
 
 test('Angular templates: all <img> have alt, all standalone <mat-icon> have aria-hidden', () => {
-  const templates = globSync('frontend/src/**/*.component.html', { cwd: ROOT });
+  const templates = globSync('frontend/projects/gilded/src/**/*.component.html', { cwd: ROOT });
   assert.ok(templates.length > 0, 'No component templates found');
 
   const allViolations: string[] = [];
