@@ -1,7 +1,9 @@
 import { test as base, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-type A11yFixtures = { checkA11y(): Promise<void> };
+interface A11yFixtures {
+  checkA11y(): Promise<void>;
+}
 
 export { expect };
 export const test = base.extend<A11yFixtures>({

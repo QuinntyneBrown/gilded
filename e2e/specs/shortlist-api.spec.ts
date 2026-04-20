@@ -83,7 +83,7 @@ test.describe('Couple merge', () => {
     const id1 = await seedCounsellor(r1, ts + 'c1');
     const id2 = await seedCounsellor(r2, ts + 'c2');
 
-    const email1 = await createAndLoginUser(r1, ts + 'a');
+    await createAndLoginUser(r1, ts + 'a');
     const email2 = await createAndLoginUser(r2, ts + 'b');
 
     await r1.post(`${BASE}/api/shortlist/${id1}`);

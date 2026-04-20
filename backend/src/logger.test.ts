@@ -32,7 +32,7 @@ function makeRes(): MockRes & ServerResponse {
     status: 0,
     headers: {},
     writeHead(c, h) { m.status = c; if (h) Object.assign(m.headers, h); },
-    end() {},
+    end() { return undefined; },
   };
   return m as unknown as MockRes & ServerResponse;
 }
@@ -59,7 +59,7 @@ test('request middleware emits structured log with correct shape', async () => {
 });
 
 test('request middleware sets X-Request-Id response header', async () => {
-  const mw = createRequestMiddleware({ logger: { logRequest: () => {} } });
+  const mw = createRequestMiddleware({ logger: { logRequest: () => undefined } });
 
   const res = makeRes();
   await mw(makeReq('POST', '/api/auth/signup'), res, async (_req, res) => {

@@ -43,7 +43,7 @@ export class ShellComponent implements OnInit {
   ngOnInit(): void {
     this.http.get<AppointmentIntent | null>('/api/me/appointment-intent/current').subscribe({
       next: (intent) => this.pendingIntent.set(intent),
-      error: () => {},
+      error: () => void 0,
     });
   }
 
@@ -52,7 +52,7 @@ export class ShellComponent implements OnInit {
     if (!id) return;
     this.http.post(`/api/appointment-intent/${id}/${status}`, {}).subscribe({
       next: () => this.pendingIntent.set(null),
-      error: () => {},
+      error: () => void 0,
     });
   }
 }

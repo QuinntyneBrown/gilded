@@ -68,7 +68,7 @@ function makeReqWithSession(rawBody: string): IncomingMessage {
 interface MockRes { status: number; writeHead(code: number, headers?: Record<string, string>): void; end(data?: string): void; }
 
 function makeRes(): MockRes & ServerResponse {
-  const m: MockRes = { status: 0, writeHead(c) { m.status = c; }, end() {} };
+  const m: MockRes = { status: 0, writeHead(c) { m.status = c; }, end() { return undefined; } };
   return m as unknown as MockRes & ServerResponse;
 }
 

@@ -84,11 +84,15 @@ The Angular dev server proxies `/api` requests to the backend via [frontend/prox
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `APP_URL` | No | Base URL used in email links. Defaults to `http://localhost:4200`. |
+| `PORT` | No | HTTP port for the backend. Defaults to `3000`, but Azure App Service injects its own value. |
+| `PHOTO_DIR` | No | Directory used for uploaded counsellor photos. Defaults to the OS temp directory. |
+| `NOTE_MASTER_KEY` | No | 64-character key used for note encryption. A development fallback is used when unset. |
 | `SMTP_HOST` | No | SMTP host for outbound email delivery. |
 | `SMTP_PORT` | No | SMTP port. Defaults to `587`. |
 | `SMTP_USER` | No | SMTP username. |
 | `SMTP_PASS` | No | SMTP password. |
 | `SMTP_FROM` | No | From address for auth and invite emails. Defaults to `noreply@gilded.app`. |
+| `GEOCODING_API_KEY` | No | Enables postal-code geocoding for counsellor distance search. |
 | `CAPTURE_EMAILS` | No | Set to `1` to capture tokens in memory and expose dev-only helper endpoints. |
 
 When `CAPTURE_EMAILS=1` is enabled, local development and E2E flows can inspect:
@@ -104,6 +108,8 @@ When `CAPTURE_EMAILS=1` is enabled, local development and E2E flows can inspect:
 | --- | --- |
 | `npm run dev` | Run frontend and backend in watch mode. |
 | `npm run build` | Build the Angular frontend. |
+| `npm run build:backend` | Compile the backend into `backend/dist` for production deployment. |
+| `npm run build:azure` | Build the frontend and backend, then assemble the Azure App Service artifact in `.artifacts/azure-webapp`. |
 | `npm run typecheck` | Run frontend and backend type checks. |
 | `npm run lint` | Run Angular lint plus backend/E2E ESLint. |
 | `npm run lint:ui` | Run Angular lint and SCSS stylelint checks. |
@@ -129,6 +135,7 @@ For planned work, use the task files in [docs/tasks](./docs/tasks) as the source
 - [L2 Detailed Requirements](./docs/specs/L2.md)
 - [Implementation Task Plan](./docs/tasks/README.md)
 - [Folder Structure](./docs/folder-structure.md)
+- [Azure Cheapest Deployment Plan](./docs/azure-cheapest-deployment-plan.md)
 
 ## Contributing
 

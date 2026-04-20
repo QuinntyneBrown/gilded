@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -90,7 +90,7 @@ export class ShortlistPageComponent implements OnInit {
   remove(id: string): void {
     this.http.delete(`/api/shortlist/${id}`).subscribe({
       next: () => this.counsellors.update(cs => cs.filter(c => c.id !== id)),
-      error: () => {},
+      error: () => void 0,
     });
   }
 }

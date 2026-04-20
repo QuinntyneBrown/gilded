@@ -6,7 +6,7 @@ import { expect, test } from '@playwright/test';
 
 const BASE = 'http://127.0.0.1:3000';
 
-const ENDPOINTS: Array<{ path: string; data: Record<string, string> }> = [
+const ENDPOINTS: { path: string; data: Record<string, string> }[] = [
   { path: '/api/auth/signup', data: { email: 'rl@example.com', password: 'Pass1!' } },
   { path: '/api/auth/login', data: { email: 'rl@example.com', password: 'Pass1!' } },
   { path: '/api/auth/reset-request', data: { email: 'rl@example.com' } },

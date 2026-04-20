@@ -95,7 +95,8 @@ export class SearchPageComponent implements OnInit {
     if (counsellor) this.router.navigate(['/counsellors', counsellor.id]);
   }
 
-  shortlistAt(_index: number): void {
+  shortlistAt(index: number): void {
+    void index;
     // T-035
   }
 

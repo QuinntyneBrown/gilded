@@ -1,5 +1,6 @@
 import { createServer, IncomingMessage, ServerResponse } from 'node:http';
 import { fileURLToPath } from 'node:url';
+import { maybeServeFrontend } from './frontend.ts';
 import { createSignupHandler } from './auth/signup.ts';
 import { createVerifyHandler, createResendHandler } from './auth/verify.ts';
 import { createLoginHandler, createMeHandler } from './auth/login.ts';
@@ -501,10 +502,13 @@ async function routeRequest(req: IncomingMessage, res: ServerResponse): Promise<
     })();
     return;
   }
+  if (maybeServeFrontend(req.method, res, path)) {
+    return;
+  }
   res.writeHead(404);
   res.end();
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  createServer(handler).listen(3000);
+  createServer(handler).listen(Number(process.env['PORT'] ?? 3000));
 }

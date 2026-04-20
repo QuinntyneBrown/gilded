@@ -47,7 +47,7 @@ test.describe('Notes UI', () => {
     await expect(page.locator('[data-author-display]:visible').filter({ hasText: displayName }).first()).toBeVisible({ timeout: 5_000 });
   });
 
-  test('private note is not visible to a different user', async ({ request, browser }) => {
+  test('private note is not visible to a different user', async ({ browser }) => {
     const ts = String(Date.now() + 3);
     const ctxA = await browser.newContext();
     const ctxB = await browser.newContext();

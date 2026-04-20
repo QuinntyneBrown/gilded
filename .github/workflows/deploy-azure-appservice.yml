@@ -1,0 +1,140 @@
+name: Deploy Azure App Service
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: azure-appservice-production
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NODE_VERSION: '24'
+  AZURE_LOCATION: ${{ vars.AZURE_LOCATION || 'canadacentral' }}
+  AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP || 'gilded-canadacentral-rg' }}
+  AZURE_APP_SERVICE_PLAN: ${{ vars.AZURE_APP_SERVICE_PLAN || 'gilded-f1-linux-plan' }}
+  AZURE_WEBAPP_NAME: ${{ vars.AZURE_WEBAPP_NAME }}
+  AZURE_APP_URL: ${{ vars.AZURE_APP_URL }}
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install workspace dependencies
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: npm ci
+
+      - name: Build Azure artifact
+        run: npm run build:azure
+
+      - name: Install production backend dependencies into artifact
+        working-directory: .artifacts/azure-webapp/backend
+        run: npm install --omit=dev --ignore-scripts
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Provision App Service Free plan and app
+        uses: azure/cli@v2
+        env:
+          NOTE_MASTER_KEY: ${{ secrets.NOTE_MASTER_KEY }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          GEOCODING_API_KEY: ${{ secrets.GEOCODING_API_KEY }}
+        with:
+          inlineScript: |
+            set -euo pipefail
+
+            : "${AZURE_WEBAPP_NAME:?Set repository variable AZURE_WEBAPP_NAME to a globally unique App Service name.}"
+            : "${NOTE_MASTER_KEY:?Set NOTE_MASTER_KEY as a GitHub Actions secret.}"
+
+            APP_URL="${AZURE_APP_URL:-https://${AZURE_WEBAPP_NAME}.azurewebsites.net}"
+            SMTP_PORT="${SMTP_PORT:-587}"
+
+            az group create \
+              --name "$AZURE_RESOURCE_GROUP" \
+              --location "$AZURE_LOCATION"
+
+            if az appservice plan show --resource-group "$AZURE_RESOURCE_GROUP" --name "$AZURE_APP_SERVICE_PLAN" >/dev/null 2>&1; then
+              az appservice plan update \
+                --resource-group "$AZURE_RESOURCE_GROUP" \
+                --name "$AZURE_APP_SERVICE_PLAN" \
+                --sku F1
+            else
+              az appservice plan create \
+                --resource-group "$AZURE_RESOURCE_GROUP" \
+                --name "$AZURE_APP_SERVICE_PLAN" \
+                --is-linux \
+                --sku F1
+            fi
+
+            if ! az webapp show --resource-group "$AZURE_RESOURCE_GROUP" --name "$AZURE_WEBAPP_NAME" >/dev/null 2>&1; then
+              az webapp create \
+                --resource-group "$AZURE_RESOURCE_GROUP" \
+                --plan "$AZURE_APP_SERVICE_PLAN" \
+                --name "$AZURE_WEBAPP_NAME" \
+                --runtime "NODE|24-lts"
+            fi
+
+            az webapp config set \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --name "$AZURE_WEBAPP_NAME" \
+              --linux-fx-version "NODE|24-lts" \
+              --startup-file "node backend/dist/server.js"
+
+            az webapp config appsettings delete \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --name "$AZURE_WEBAPP_NAME" \
+              --setting-names CAPTURE_EMAILS GEOCODING_API_KEY SMTP_FROM SMTP_HOST SMTP_PASS SMTP_PORT SMTP_USER || true
+
+            settings=(
+              "APP_URL=$APP_URL"
+              "NODE_ENV=production"
+              "NOTE_MASTER_KEY=$NOTE_MASTER_KEY"
+              "PHOTO_DIR=/home/site/data/photos"
+              "SCM_DO_BUILD_DURING_DEPLOYMENT=false"
+              "WEBSITE_NODE_DEFAULT_VERSION=~24"
+            )
+
+            if [ -n "${SMTP_FROM:-}" ]; then settings+=("SMTP_FROM=$SMTP_FROM"); fi
+            if [ -n "${SMTP_HOST:-}" ]; then settings+=("SMTP_HOST=$SMTP_HOST"); fi
+            if [ -n "${SMTP_PASS:-}" ]; then settings+=("SMTP_PASS=$SMTP_PASS"); fi
+            if [ -n "${SMTP_PORT:-}" ]; then settings+=("SMTP_PORT=$SMTP_PORT"); fi
+            if [ -n "${SMTP_USER:-}" ]; then settings+=("SMTP_USER=$SMTP_USER"); fi
+            if [ -n "${GEOCODING_API_KEY:-}" ]; then settings+=("GEOCODING_API_KEY=$GEOCODING_API_KEY"); fi
+
+            az webapp config appsettings set \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --name "$AZURE_WEBAPP_NAME" \
+              --settings "${settings[@]}"
+
+      - name: Deploy artifact to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: .artifacts/azure-webapp

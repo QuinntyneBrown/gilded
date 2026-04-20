@@ -7,21 +7,17 @@ import assert from 'node:assert/strict';
 import { PassThrough } from 'node:stream';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createSignupHandler } from './signup.ts';
-import { createPostReviewHandler } from '../counsellor/review.ts';
 import { InMemoryUserStore } from './user-store.ts';
-import { InMemorySessionStore } from './session-store.ts';
-import { InMemoryCounsellorStore } from '../counsellor/counsellor-store.ts';
-import { InMemoryReviewStore } from '../counsellor/review-store.ts';
 import type { Mailer } from './mailer.ts';
 import type { CaptchaVerifier } from './captcha.ts';
 
 const noopMailer: Mailer = {
-  sendVerification: async () => {},
-  sendReset: async () => {},
-  sendInvite: async () => {},
-  sendRejection: async () => {},
-  sendChosenNotification: async () => {},
-  sendDeletionConfirmation: async () => {},
+  sendVerification: async () => void 0,
+  sendReset: async () => void 0,
+  sendInvite: async () => void 0,
+  sendRejection: async () => void 0,
+  sendChosenNotification: async () => void 0,
+  sendDeletionConfirmation: async () => void 0,
 };
 
 function makeReq(body: Record<string, unknown>): IncomingMessage {
@@ -43,7 +39,7 @@ interface MockRes {
 }
 
 function makeRes(): MockRes & ServerResponse {
-  const m: MockRes = { status: 0, writeHead(c) { m.status = c; }, end() {} };
+  const m: MockRes = { status: 0, writeHead(c) { m.status = c; }, end() { return undefined; } };
   return m as unknown as MockRes & ServerResponse;
 }
 

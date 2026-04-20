@@ -136,14 +136,14 @@ export class CounsellorProfilePageComponent implements OnInit, AfterViewInit {
     this.loadReviews(id);
     this.http.get<{ userId: string; email: string }>('/api/auth/me').subscribe({
       next: (me) => this.userId.set(me.userId),
-      error: () => {},
+      error: () => void 0,
     });
   }
 
   private loadReviews(id: string): void {
     this.http.get<Review[]>(`/api/counsellors/${id}/reviews`).subscribe({
       next: (r) => this.reviews.set(r),
-      error: () => {},
+      error: () => void 0,
     });
   }
 
@@ -155,7 +155,7 @@ export class CounsellorProfilePageComponent implements OnInit, AfterViewInit {
       next: (result) => {
         this.counsellor.update(c => c ? { ...c, rating: result.rating, reviewCount: result.reviewCount } : c);
       },
-      error: () => {},
+      error: () => void 0,
     });
   }
 
@@ -171,7 +171,7 @@ export class CounsellorProfilePageComponent implements OnInit, AfterViewInit {
         this.reviewBody.set('');
         this.counsellor.update(c => c ? { ...c, reviewCount: c.reviewCount + 1 } : c);
       },
-      error: () => {},
+      error: () => void 0,
     });
   }
 
@@ -185,7 +185,7 @@ export class CounsellorProfilePageComponent implements OnInit, AfterViewInit {
             r.id === reviewId ? { ...r, authorId: null, body: '[removed by author]' } : r
           ));
         },
-        error: () => {},
+        error: () => void 0,
       });
     });
   }
@@ -194,7 +194,7 @@ export class CounsellorProfilePageComponent implements OnInit, AfterViewInit {
     if (this.comments()[reviewId]) return;
     this.http.get<Comment[]>(`/api/reviews/${reviewId}/comments`).subscribe({
       next: (cs) => this.comments.update(m => ({ ...m, [reviewId]: cs })),
-      error: () => {},
+      error: () => void 0,
     });
   }
 
@@ -215,7 +215,7 @@ export class CounsellorProfilePageComponent implements OnInit, AfterViewInit {
         this.comments.update(m => ({ ...m, [reviewId]: [...(m[reviewId] ?? []), comment] }));
         this.commentBodies.update(m => ({ ...m, [reviewId]: '' }));
       },
-      error: () => {},
+      error: () => void 0,
     });
   }
 

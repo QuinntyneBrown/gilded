@@ -171,6 +171,63 @@ Recommended Azure app settings:
 
 ## Deployment Steps
 
+## GitHub Actions Workflow
+
+The repo now includes [.github/workflows/deploy-azure-appservice.yml](../.github/workflows/deploy-azure-appservice.yml).
+
+It is designed for the cheapest current Azure path documented above:
+
+- deploy target: **one Linux App Service**
+- plan SKU: **Free F1**
+- region default: **Canada Central**
+- runtime: **Node 24 LTS**
+- startup command: `node backend/dist/server.js`
+- artifact shape:
+  - compiled backend in `backend/dist`
+  - Angular production build copied into `backend/public`
+  - production backend dependencies installed into the artifact before deploy
+
+Trigger behavior:
+
+- runs automatically after the `CI` workflow succeeds on `main`
+- can also be run manually with `workflow_dispatch`
+
+### Required GitHub repository variables
+
+- `AZURE_WEBAPP_NAME`
+  - must be globally unique across Azure App Service
+
+### Optional GitHub repository variables
+
+- `AZURE_LOCATION`
+  - defaults to `canadacentral`
+- `AZURE_RESOURCE_GROUP`
+  - defaults to `gilded-canadacentral-rg`
+- `AZURE_APP_SERVICE_PLAN`
+  - defaults to `gilded-f1-linux-plan`
+- `AZURE_APP_URL`
+  - defaults to `https://<AZURE_WEBAPP_NAME>.azurewebsites.net`
+
+### Required GitHub Actions secrets
+
+- `AZURE_CLIENT_ID`
+- `AZURE_TENANT_ID`
+- `AZURE_SUBSCRIPTION_ID`
+- `NOTE_MASTER_KEY`
+
+These support Azure OIDC login plus the note-encryption requirement.
+
+### Optional GitHub Actions secrets
+
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_FROM`
+- `GEOCODING_API_KEY`
+
+If SMTP secrets are omitted, the workflow leaves those settings unset so the app falls back to its existing defaults. That keeps deployment possible for a demo, but real signup / reset / invite email delivery will not work until SMTP is configured.
+
 ### Phase 1: Cheapest demo deployment
 
 1. Make the code changes above.

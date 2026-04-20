@@ -25,7 +25,10 @@ import type { Mailer } from '../auth/mailer.ts';
 const PASSWORD = 'ValidPass123!';
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-type SentEmail = { type: string; email: string };
+interface SentEmail {
+  type: string;
+  email: string;
+}
 function fakeMailer(): { mailer: Mailer; sent: SentEmail[] } {
   const sent: SentEmail[] = [];
   return {
