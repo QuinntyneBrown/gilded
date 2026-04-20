@@ -8,6 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { passwordPolicy } from '../auth/validators';
 
+const TURNSTILE_SITE_KEY = '1x00000000000000000000AA';
+
 @Component({
   selector: 'app-signup',
   standalone: true,
@@ -22,8 +24,6 @@ import { passwordPolicy } from '../auth/validators';
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.scss',
 })
-const TURNSTILE_SITE_KEY = '1x00000000000000000000AA';
-
 export class SignupPageComponent implements AfterViewInit {
   private readonly http = inject(HttpClient);
 
@@ -39,7 +39,7 @@ export class SignupPageComponent implements AfterViewInit {
   private captchaToken: string | null = null;
 
   ngAfterViewInit(): void {
-    const turnstile = (window as Record<string, unknown>)['turnstile'] as { render(id: string, opts: unknown): void } | undefined;
+    const turnstile = (window as unknown as Record<string, unknown>)['turnstile'] as { render(id: string, opts: unknown): void } | undefined;
     if (turnstile) {
       turnstile.render('#signup-captcha', {
         sitekey: TURNSTILE_SITE_KEY,

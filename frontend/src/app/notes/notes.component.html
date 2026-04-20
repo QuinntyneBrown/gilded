@@ -29,6 +29,7 @@
               } @else {
                 <mat-card-content>
                   <mat-form-field appearance="outline" class="edit-field">
+                    <mat-label>Edit note</mat-label>
                     <textarea matInput rows="3" [value]="editBody()" (input)="editBody.set($any($event).target.value)" data-edit-body></textarea>
                   </mat-form-field>
                   <mat-card-actions>
@@ -70,6 +71,7 @@
                 } @else {
                   <mat-card-content>
                     <mat-form-field appearance="outline" class="edit-field">
+                      <mat-label>Edit note</mat-label>
                       <textarea matInput rows="3" [value]="editBody()" (input)="editBody.set($any($event).target.value)" data-edit-body></textarea>
                     </mat-form-field>
                     <mat-card-actions>

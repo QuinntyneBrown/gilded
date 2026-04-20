@@ -28,7 +28,7 @@
           <th mat-header-cell *matHeaderCellDef>Name</th>
           <td mat-cell *matCellDef="let c">
             <a [routerLink]="['/counsellors', c.id]" data-counsellor-name>{{ c.name }}</a>
-            @if (c.chosen) { <mat-icon data-chosen color="primary">check_circle</mat-icon> }
+            @if (c.chosen) { <mat-icon data-chosen color="primary" aria-hidden="true">check_circle</mat-icon> }
           </td>
         </ng-container>
 
@@ -93,7 +93,7 @@
               </div>
               <mat-card-title>
                 <a [routerLink]="['/counsellors', c.id]" data-counsellor-name>{{ c.name }}</a>
-                @if (c.chosen) { <mat-icon data-chosen color="primary">check_circle</mat-icon> }
+                @if (c.chosen) { <mat-icon data-chosen color="primary" aria-hidden="true">check_circle</mat-icon> }
               </mat-card-title>
               <mat-card-subtitle>{{ c.denomination }}</mat-card-subtitle>
             </mat-card-header>

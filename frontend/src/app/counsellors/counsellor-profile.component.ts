@@ -64,6 +64,8 @@ interface Comment {
 })
 export class ConfirmDialogComponent {}
 
+const TURNSTILE_SITE_KEY = '1x00000000000000000000AA';
+
 @Component({
   selector: 'app-counsellor-profile',
   standalone: true,
@@ -86,8 +88,6 @@ export class ConfirmDialogComponent {}
   templateUrl: './counsellor-profile.component.html',
   styleUrl: './counsellor-profile.component.scss',
 })
-const TURNSTILE_SITE_KEY = '1x00000000000000000000AA';
-
 export class CounsellorProfilePageComponent implements OnInit, AfterViewInit {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
@@ -117,7 +117,7 @@ export class CounsellorProfilePageComponent implements OnInit, AfterViewInit {
   readonly reviewCharCount = computed(() => this.reviewBody().length);
 
   ngAfterViewInit(): void {
-    const turnstile = (window as Record<string, unknown>)['turnstile'] as { render(id: string, opts: unknown): void } | undefined;
+    const turnstile = (window as unknown as Record<string, unknown>)['turnstile'] as { render(id: string, opts: unknown): void } | undefined;
     if (turnstile) {
       turnstile.render('#review-captcha', {
         sitekey: TURNSTILE_SITE_KEY,
