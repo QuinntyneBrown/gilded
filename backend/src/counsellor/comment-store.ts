@@ -12,7 +12,9 @@ export interface CommentStore {
   create(comment: Comment): Promise<void>;
   findById(id: string): Promise<Comment | null>;
   findByReview(reviewId: string): Promise<Comment[]>;
+  findByAuthor(authorId: string): Promise<Comment[]>;
   softDelete(id: string, deletedBy: 'author' | 'moderator'): Promise<void>;
+  anonymize(id: string): Promise<void>;
 }
 
 export class InMemoryCommentStore implements CommentStore {
@@ -32,8 +34,17 @@ export class InMemoryCommentStore implements CommentStore {
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
+  async findByAuthor(authorId: string): Promise<Comment[]> {
+    return [...this.byId.values()].filter(c => c.authorId === authorId);
+  }
+
   async softDelete(id: string, deletedBy: 'author' | 'moderator'): Promise<void> {
     const c = this.byId.get(id);
     if (c) { c.deletedAt = new Date(); c.deletedBy = deletedBy; }
+  }
+
+  async anonymize(id: string): Promise<void> {
+    const c = this.byId.get(id);
+    if (c) c.authorId = '';
   }
 }

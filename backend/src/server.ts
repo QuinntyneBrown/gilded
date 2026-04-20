@@ -42,6 +42,7 @@ import { NodemailerMailer } from './auth/mailer.ts';
 import type { Mailer } from './auth/mailer.ts';
 import { createRequestMiddleware, ConsoleLogger } from './logger.ts';
 import { recordRequest, createMetricsHandler } from './metrics.ts';
+import { createDeleteAccountHandler } from './account/delete.ts';
 
 const CAPTURE = process.env['CAPTURE_EMAILS'] === '1';
 const captureLog: { email: string; token: string }[] = [];
@@ -55,6 +56,7 @@ function buildMailer(): Mailer {
     sendInvite: async (email, token) => { captureLog.push({ email, token }); },
     sendRejection: async (email, _name, reason) => { captureLog.push({ email, token: reason }); },
     sendChosenNotification: async (email, name) => { captureLog.push({ email, token: name }); },
+    sendDeletionConfirmation: async (email) => { captureLog.push({ email, token: 'deletion' }); },
   };
 }
 
@@ -94,6 +96,7 @@ const resetCompleteHandler = createResetCompleteHandler({ userStore, sessionStor
 const inviteHandler = createInviteHandler({ userStore, coupleStore, mailer: authDeps.mailer, sessionStore });
 const acceptHandler = createAcceptHandler({ userStore, coupleStore, mailer: authDeps.mailer, sessionStore, eventBus });
 const unlinkHandler = createUnlinkHandler({ userStore, coupleStore, sessionStore, eventBus });
+const deleteAccountHandler = createDeleteAccountHandler({ userStore, sessionStore, mailer: authDeps.mailer });
 const getCounsellorHandler = createGetCounsellorHandler({ counsellorStore });
 const submitCounsellorHandler = createSubmitCounsellorHandler({ counsellorStore, sessionStore });
 const listPendingHandler = createListPendingHandler({ counsellorStore, sessionStore, userStore, mailer: authDeps.mailer });
@@ -231,6 +234,10 @@ async function routeRequest(req: IncomingMessage, res: ServerResponse): Promise<
   }
   if (req.method === 'POST' && path === '/api/couple/chosen') {
     await chosenCounsellorHandler(req, res);
+    return;
+  }
+  if (req.method === 'POST' && path === '/api/me/delete') {
+    await deleteAccountHandler(req, res);
     return;
   }
   if (req.method === 'GET' && path === '/api/me/notifications') {

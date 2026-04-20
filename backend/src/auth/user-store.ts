@@ -1,6 +1,6 @@
 import { timingSafeEqual } from 'node:crypto';
 
-export type UserState = 'pending_verification' | 'active' | 'disabled';
+export type UserState = 'pending_verification' | 'active' | 'disabled' | 'pending_deletion';
 
 export type UserRole = 'user' | 'moderator' | 'admin';
 
@@ -13,6 +13,7 @@ export interface User {
   spouseId?: string;
   coupleId?: string;
   role?: UserRole;
+  deletionRequestedAt?: Date;
 }
 
 export interface VerificationToken {
@@ -38,6 +39,9 @@ export interface UserStore {
   updateCouple(userId: string, coupleId: string, spouseId: string): Promise<void>;
   clearCouple(userId: string): Promise<void>;
   setRole(userId: string, role: UserRole): Promise<void>;
+  requestDeletion(userId: string, at: Date): Promise<void>;
+  findPendingDeletion(olderThan: Date): Promise<User[]>;
+  delete(userId: string): Promise<void>;
 }
 
 export class InMemoryUserStore implements UserStore {
@@ -122,5 +126,21 @@ export class InMemoryUserStore implements UserStore {
   async setRole(userId: string, role: UserRole): Promise<void> {
     const user = this.byId.get(userId);
     if (user) user.role = role;
+  }
+
+  async requestDeletion(userId: string, at: Date): Promise<void> {
+    const user = this.byId.get(userId);
+    if (user) { user.state = 'pending_deletion'; user.deletionRequestedAt = at; }
+  }
+
+  async findPendingDeletion(olderThan: Date): Promise<User[]> {
+    return [...this.byId.values()].filter(
+      u => u.state === 'pending_deletion' && u.deletionRequestedAt && u.deletionRequestedAt <= olderThan,
+    );
+  }
+
+  async delete(userId: string): Promise<void> {
+    const user = this.byId.get(userId);
+    if (user) { this.users.delete(user.email); this.byId.delete(userId); }
   }
 }

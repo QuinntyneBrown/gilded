@@ -23,6 +23,7 @@ export interface NoteStore {
   update(id: string, patch: Partial<Pick<Note, 'ciphertext' | 'iv' | 'body' | 'updatedAt'>>): Promise<void>;
   softDelete(id: string): Promise<void>;
   hardDelete(id: string): Promise<void>;
+  anonymize(id: string): Promise<void>;
 }
 
 export class InMemoryNoteStore implements NoteStore {
@@ -67,5 +68,10 @@ export class InMemoryNoteStore implements NoteStore {
 
   async hardDelete(id: string): Promise<void> {
     this.byId.delete(id);
+  }
+
+  async anonymize(id: string): Promise<void> {
+    const note = this.byId.get(id);
+    if (note) { note.authorId = ''; note.ciphertext = undefined; note.iv = undefined; note.keyId = undefined; }
   }
 }

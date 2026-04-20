@@ -6,6 +6,7 @@ export interface Mailer {
   sendInvite(email: string, token: string, inviterEmail: string): Promise<void>;
   sendRejection(email: string, counsellorName: string, reason: string): Promise<void>;
   sendChosenNotification(email: string, counsellorName: string): Promise<void>;
+  sendDeletionConfirmation(email: string): Promise<void>;
 }
 
 export class NodemailerMailer implements Mailer {
@@ -63,6 +64,15 @@ export class NodemailerMailer implements Mailer {
       to: email,
       subject: `Your spouse chose ${counsellorName}`,
       text: `Your spouse has selected ${counsellorName} as your counsellor on Gilded.`,
+    });
+  }
+
+  async sendDeletionConfirmation(email: string): Promise<void> {
+    await this.transport.sendMail({
+      from: process.env['SMTP_FROM'] ?? 'noreply@gilded.app',
+      to: email,
+      subject: 'Your Gilded account deletion is scheduled',
+      text: 'Your account has been scheduled for deletion.\n\nYour data will be permanently removed within 30 days.\n\nIf you did not request this, contact support immediately.',
     });
   }
 }

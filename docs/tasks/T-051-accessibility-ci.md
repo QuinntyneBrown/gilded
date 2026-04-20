@@ -40,6 +40,6 @@ Wire `@axe-core/playwright` into every Playwright spec via a fixture. Any page v
 4. Given any text or UI element, when rendered, then color contrast meets WCAG AA ratios.
 
 ## Done When
-- [ ] Acceptance tests green.
-- [ ] Verification check answered.
-- [ ] Two commits recorded.
+- [x] Acceptance tests green.
+- [x] Verification check answered.
+- [x] Two commits recorded.

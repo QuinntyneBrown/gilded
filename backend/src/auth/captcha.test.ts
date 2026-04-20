@@ -21,13 +21,14 @@ const noopMailer: Mailer = {
   sendInvite: async () => {},
   sendRejection: async () => {},
   sendChosenNotification: async () => {},
+  sendDeletionConfirmation: async () => {},
 };
 
 function makeReq(body: Record<string, unknown>): IncomingMessage {
   const stream = new PassThrough() as unknown as IncomingMessage;
-  (stream as Record<string, unknown>)['headers'] = { 'content-type': 'application/json' };
-  (stream as Record<string, unknown>)['method'] = 'POST';
-  (stream as Record<string, unknown>)['url'] = '/';
+  (stream as unknown as { headers: unknown })['headers'] = { 'content-type': 'application/json' };
+  (stream as unknown as { method: unknown })['method'] = 'POST';
+  (stream as unknown as { url: unknown })['url'] = '/';
   setImmediate(() => {
     (stream as unknown as PassThrough).push(JSON.stringify(body));
     (stream as unknown as PassThrough).push(null);
