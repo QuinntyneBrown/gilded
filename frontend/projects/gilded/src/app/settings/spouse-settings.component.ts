@@ -9,20 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
-@Component({
-  selector: 'app-unlink-confirm-dialog',
-  standalone: true,
-  imports: [MatButtonModule, MatDialogModule],
-  template: `
-    <mat-dialog-content>Are you sure you want to unlink from your spouse?</mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-raised-button color="warn" [mat-dialog-close]="true">Confirm</button>
-    </mat-dialog-actions>
-  `,
-})
-export class UnlinkConfirmDialogComponent {}
+import { UnlinkConfirmDialogComponent } from './dialogs/unlink-confirm-dialog.component';
 
 interface MeResponse {
   coupleId: string | null;

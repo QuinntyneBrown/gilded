@@ -1,0 +1,8 @@
+<h2 mat-dialog-title>Duplicate Counsellor</h2>
+<mat-dialog-content>
+  <p>A matching counsellor already exists.</p>
+  <a [routerLink]="['/counsellors', existingId]" mat-button color="primary" mat-dialog-close data-role="existing-profile-link">View Existing Profile</a>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Dismiss</button>
+</mat-dialog-actions>

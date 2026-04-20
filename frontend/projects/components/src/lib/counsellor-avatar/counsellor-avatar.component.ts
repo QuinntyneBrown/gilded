@@ -7,26 +7,8 @@ const PALETTE = ['#1565C0', '#2E7D32', '#6A1B9A', '#AD1457', '#00695C', '#E65100
   selector: 'lib-counsellor-avatar',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="avatar" [style.background-color]="bgColor()" [style.width.px]="size()" [style.height.px]="size()">
-      <span class="initials" [style.font-size.px]="size() * 0.35">{{ initials() }}</span>
-    </div>
-  `,
-  styles: [`
-    .avatar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-    }
-    .initials {
-      color: #fff;
-      font-size: 1.5rem;
-      font-weight: 600;
-      line-height: 1;
-      user-select: none;
-    }
-  `],
+  templateUrl: './counsellor-avatar.component.html',
+  styleUrl: './counsellor-avatar.component.scss',
 })
 export class CounsellorAvatarComponent {
   name = input<string>('');

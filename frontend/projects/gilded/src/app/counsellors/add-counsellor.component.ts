@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { firstValueFrom } from 'rxjs';
+import { DuplicateDialogComponent } from './dialogs/duplicate-dialog.component';
 
 function postalCodeValidator(control: AbstractControl): ValidationErrors | null {
   const v = String(control.value ?? '').trim().toUpperCase().replace(/\s/g, '');
@@ -16,25 +17,6 @@ function postalCodeValidator(control: AbstractControl): ValidationErrors | null 
   const ca = /^[A-CEGHJ-NPRSTVXY]\d[A-CEGHJ-NPRSTV-Z]\d[A-CEGHJ-NPRSTV-Z]\d$/.test(v);
   const us = /^\d{5}$/.test(v);
   return ca || us ? null : { postalCode: true };
-}
-
-@Component({
-  selector: 'app-duplicate-dialog',
-  standalone: true,
-  imports: [MatButtonModule, MatDialogModule, RouterModule],
-  template: `
-    <h2 mat-dialog-title>Duplicate Counsellor</h2>
-    <mat-dialog-content>
-      <p>A matching counsellor already exists.</p>
-      <a [routerLink]="['/counsellors', existingId]" mat-button color="primary" mat-dialog-close data-role="existing-profile-link">View Existing Profile</a>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Dismiss</button>
-    </mat-dialog-actions>
-  `,
-})
-export class DuplicateDialogComponent {
-  existingId = '';
 }
 
 @Component({
@@ -50,6 +32,7 @@ export class DuplicateDialogComponent {
     MatDialogModule,
   ],
   templateUrl: './add-counsellor.component.html',
+  styleUrl: './add-counsellor.component.scss',
 })
 export class AddCounsellorPageComponent {
   private readonly http = inject(HttpClient);

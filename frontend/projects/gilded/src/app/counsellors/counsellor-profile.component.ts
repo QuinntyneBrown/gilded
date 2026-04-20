@@ -15,6 +15,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { CounsellorAvatarComponent } from 'components';
+import { ConfirmDialogComponent } from './dialogs/confirm-dialog.component';
 
 interface CounsellorProfile {
   id: string;
@@ -49,20 +50,6 @@ interface Comment {
   body: string;
   createdAt: string;
 }
-
-@Component({
-  selector: 'app-confirm-dialog',
-  standalone: true,
-  imports: [MatButtonModule, MatDialogModule],
-  template: `
-    <mat-dialog-content>Are you sure you want to delete this?</mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-raised-button color="warn" [mat-dialog-close]="true">Confirm</button>
-    </mat-dialog-actions>
-  `,
-})
-export class ConfirmDialogComponent {}
 
 const TURNSTILE_SITE_KEY = '1x00000000000000000000AA';
 
